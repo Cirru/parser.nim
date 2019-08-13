@@ -1,13 +1,15 @@
-# This is just an example to get you started. You may wish to put all of your
-# tests into a single file, or separate them into multiple `test1`, `test2`
-# etc. files (better names are recommended, just make sure the name starts with
-# the letter 't').
-#
-# To run these tests, simply execute `nimble test`.
 
 import unittest
+import json
 
 import cirruParser
 
 test "can add":
   check add(10,0) == 10
+
+test "read line":
+  let dataCode = readFile("tests/data/line.json")
+  let sourceCode = readFile("tests/cirru/line.cirru")
+  echo parseJson(dataCode)
+  echo sourceCode
+  check (dataCode == "")
