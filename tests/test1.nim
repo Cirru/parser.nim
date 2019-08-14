@@ -13,3 +13,8 @@ test "read line":
   echo parseJson(dataCode)
   echo sourceCode
   check (dataCode == "")
+
+test "creates Cirru seq":
+  let a = createCirruSeq()
+  echo a
+  check a.len == 2
