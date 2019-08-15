@@ -10,10 +10,6 @@ type
     of cirruString: text*: string
     of cirruSeq: list*: seq[CirruNode]
 
-proc add*(x, y: int): int =
-  ## Adds two files together.
-  return x + y
-
 proc createCirruSeq*(): seq[CirruNode] =
   var a: seq[CirruNode]
   let n1 = CirruNode(kind: cirruString, text: "n1")
@@ -22,6 +18,9 @@ proc createCirruSeq*(): seq[CirruNode] =
   a.add n1
   a.add n2
   return a
+
+proc createCirruString*(x: string): CirruNode =
+  return CirruNode(kind: cirruString, text: x)
 
 proc sameNodes*(x, y: CirruNode): bool =
   ## compare if two nodes equal
