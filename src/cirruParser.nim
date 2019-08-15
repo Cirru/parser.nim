@@ -1,14 +1,14 @@
 
 # thanks to https://forum.nim-lang.org/t/4233
 type
-  CirruNodeKind = enum
+  CirruNodeKind* = enum
     cirruString,
     cirruSeq
 
-  CirruNode = object
-    case kind: CirruNodeKind
-    of cirruString: text: string
-    of cirruSeq: list: seq[CirruNode]
+  CirruNode* = object
+    case kind*: CirruNodeKind
+    of cirruString: text*: string
+    of cirruSeq: list*: seq[CirruNode]
 
 proc add*(x, y: int): int =
   ## Adds two files together.
@@ -22,3 +22,21 @@ proc createCirruSeq*(): seq[CirruNode] =
   a.add n1
   a.add n2
   return a
+
+proc sameNodes*(x, y: CirruNode): bool =
+  ## compare if two nodes equal
+  if (x.kind == y.kind):
+    if (x.kind == cirruString):
+      return x.text == y.text
+    else:
+      if (x.list.len == y.list.len):
+        for k, v in x.list:
+          if (sameNodes(v, y.list[k])):
+            continue
+          else:
+            return false
+        return true
+      else:
+        return false
+  else:
+    return false
