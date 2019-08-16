@@ -14,7 +14,7 @@ import typetraits
 
 test "creates Cirru seq":
   let a = createCirruSeq()
-  echo a
+  echo "Example:", a
   check a.len == 2
 
 test "nodes comparing":
@@ -34,10 +34,19 @@ test "nodes comparing":
   check sameNodes(a1, b1) == false
 
 test "Cirru from JSON":
-  let x = %* ["a", "b", ["c"]]
 
-  for v in x.items:
-    echo v.type
+  let jsonNodeOfC = JsonNode(kind: JString, str: "c")
+  let nodeOfC = CirruNode(kind: cirruString, text: "c")
+  check sameNodes(createCirruNodeFromJson(jsonNodeOfC), nodeOfC)
 
-  check false
+  let jsonEmpty = %* []
+  let nodeOfEmpty = CirruNode(kind: cirruSeq, list: @[])
+  check sameNodes(createCirruNodeFromJson(jsonEmpty), nodeOfEmpty)
 
+  let jsonArray = %* ["a"]
+  let nodeOfArray = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruString, text: "a")])
+  check sameNodes(createCirruNodeFromJson(jsonArray), nodeOfArray)
+
+  let jsonNested = %* [[]]
+  let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: @[])])
+  check sameNodes(createCirruNodeFromJson(jsonNested), nodeOfNested)
