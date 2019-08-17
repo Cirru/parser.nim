@@ -1,3 +1,4 @@
+import json
 
 # thanks to https://forum.nim-lang.org/t/4233
 type
@@ -21,6 +22,19 @@ proc createCirruSeq*(): seq[CirruNode] =
 
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)
+
+proc createCirruNodeFromJson*(xs: JsonNode): CirruNode =
+  case xs.kind:
+    of JArray:
+      var b: seq[CirruNode]
+      for k, v in xs.elems:
+        b.add createCirruNodeFromJson(v)
+      return CirruNode(kind: cirruSeq, list: b)
+    of JString:
+      return CirruNode(kind: cirruString, text: xs.str)
+    else:
+      echo xs
+      raise newException(OSError, "Unknown type in JSON")
 
 proc sameNodes*(x, y: CirruNode): bool =
   ## compare if two nodes equal
