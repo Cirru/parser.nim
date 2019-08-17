@@ -12,11 +12,6 @@ import typetraits
   # echo sourceCode
   # check (dataCode != "")
 
-test "creates Cirru seq":
-  let a = createCirruSeq()
-  echo "Example:", a
-  check a.len == 2
-
 test "nodes comparing":
   let a1 = CirruNode(kind: cirruString, text: "a")
   let a2 = CirruNode(kind: cirruString, text: "a")

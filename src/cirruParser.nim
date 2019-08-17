@@ -11,15 +11,6 @@ type
     of cirruString: text*: string
     of cirruSeq: list*: seq[CirruNode]
 
-proc createCirruSeq*(): seq[CirruNode] =
-  var a: seq[CirruNode]
-  let n1 = CirruNode(kind: cirruString, text: "n1")
-  var b: seq[CirruNode]
-  let n2 = CirruNode(kind: cirruSeq, list: b)
-  a.add n1
-  a.add n2
-  return a
-
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)
 
