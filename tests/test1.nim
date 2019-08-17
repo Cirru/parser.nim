@@ -16,32 +16,43 @@ test "nodes comparing":
   let a1 = CirruNode(kind: cirruString, text: "a")
   let a2 = CirruNode(kind: cirruString, text: "a")
 
-  check sameNodes(a1, a2)
+  check cirruNodesEqual(a1, a2)
 
   let a3 = CirruNode(kind: cirruString, text: "b")
-  check sameNodes(a1, a3) == false
+  check cirruNodesEqual(a1, a3) == false
 
   let b0: seq[CirruNode] = @[]
   let b1 = CirruNode(kind: cirruSeq, list: b0)
   let b2 = CirruNode(kind: cirruSeq, list: b0)
-  check sameNodes(b1, b2)
+  check cirruNodesEqual(b1, b2)
 
-  check sameNodes(a1, b1) == false
+  check cirruNodesEqual(a1, b1) == false
 
 test "Cirru from JSON":
 
   let jsonNodeOfC = JsonNode(kind: JString, str: "c")
   let nodeOfC = CirruNode(kind: cirruString, text: "c")
-  check sameNodes(createCirruNodeFromJson(jsonNodeOfC), nodeOfC)
+  check cirruNodesEqual(createCirruNodeFromJson(jsonNodeOfC), nodeOfC)
 
   let jsonEmpty = %* []
   let nodeOfEmpty = CirruNode(kind: cirruSeq, list: @[])
-  check sameNodes(createCirruNodeFromJson(jsonEmpty), nodeOfEmpty)
+  check cirruNodesEqual(createCirruNodeFromJson(jsonEmpty), nodeOfEmpty)
 
   let jsonArray = %* ["a"]
   let nodeOfArray = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruString, text: "a")])
-  check sameNodes(createCirruNodeFromJson(jsonArray), nodeOfArray)
+  check cirruNodesEqual(createCirruNodeFromJson(jsonArray), nodeOfArray)
 
   let jsonNested = %* [[]]
   let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: @[])])
-  check sameNodes(createCirruNodeFromJson(jsonNested), nodeOfNested)
+  check cirruNodesEqual(createCirruNodeFromJson(jsonNested), nodeOfNested)
+
+test "Lex nodes equality":
+  check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")], @[LexNode(kind: lexToken, text: "a")])
+  check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")], @[LexNode(kind: lexToken, text: "b")]) == false
+  check lexNodesEqual(@[LexNode(kind: lexControl, operator: controlIndent)],
+                      @[LexNode(kind: lexControl, operator: controlIndent)])
+  check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")],
+                      @[LexNode(kind: lexControl, operator: controlIndent)]) == false
+
+# test "Lex code":
+#   let pieces = lexCode("a b")
