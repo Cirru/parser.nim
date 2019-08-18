@@ -54,5 +54,9 @@ test "Lex nodes equality":
   check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")],
                       @[LexNode(kind: lexControl, operator: controlIndent)]) == false
 
-# test "Lex code":
-#   let pieces = lexCode("a b")
+test "Lex code":
+  echo lexCode("a b")
+  echo lexCode("a \"b\"")
+  echo lexCode("a \"b c\"")
+  echo lexCode("a\n  b")
+  echo lexCode("a\n  \"b\"")

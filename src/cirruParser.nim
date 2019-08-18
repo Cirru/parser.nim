@@ -1,3 +1,4 @@
+import strutils
 import json
 
 # thanks to https://forum.nim-lang.org/t/4233
@@ -11,7 +12,6 @@ type
     of cirruString: text*: string
     of cirruSeq: list*: seq[CirruNode]
 
-type
   LexNodeKind* = enum
     lexToken,
     lexControl
@@ -27,6 +27,15 @@ type
     of lexToken: text*: string
     of lexControl: operator*: ControlOperator
 
+  LexState = enum
+    lexStateToken,
+    lexStateSpace,
+    lexStateString,
+    lexStateEscape,
+    lexStateIndent
+
+  CirruParseError* = object of Exception
+
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)
 
@@ -41,7 +50,7 @@ proc createCirruNodeFromJson*(xs: JsonNode): CirruNode =
       return CirruNode(kind: cirruString, text: xs.str)
     else:
       echo xs
-      raise newException(OSError, "Unknown type in JSON")
+      raise newException(CirruParseError, "Unknown type in JSON")
 
 proc cirruNodesEqual*(x, y: CirruNode): bool =
   ## compare if two nodes equal
@@ -85,5 +94,73 @@ proc lexNodesEqual*(xs, ys: seq[LexNode]): bool =
 
 proc lexCode*(code: string): seq[LexNode] =
   var pieces: seq[LexNode]
+  var lexingState = lexStateIndent
+  var buffer = ""
+  var indentation = 0
+
+  for c in code:
+
+    # echo lexingState, " - ", escape($c), escape(buffer)
+
+    case lexingState
+    of lexStateIndent:
+      case c
+      of ' ':
+        buffer.add(' ')
+        indentation += 1
+      of '\n':
+        indentation = 0
+      of '"':
+        buffer = ""
+        lexingState = lexStateString
+      else:
+        buffer = $c
+        lexingState = lexStateToken
+    of lexStateEscape:
+      buffer.add c
+    of lexStateString:
+      case c
+      of '\\':
+        lexingState = lexStateSpace
+      of '"':
+        lexingState = lexStateSpace
+        pieces.add LexNode(kind: lexToken, text: buffer)
+      else:
+        buffer.add c
+    of lexStateSpace:
+      case c
+      of ' ':
+        discard "still space"
+      of '"':
+        buffer = ""
+        lexingState = lexStateString
+      of '\n':
+        indentation = 0
+        lexingState = lexStateIndent
+      else:
+        buffer = $c
+        lexingState = lexStateToken
+    of lexStateToken:
+      case c
+      of ' ':
+        pieces.add LexNode(kind: lexToken, text: buffer)
+        lexingState = lexStateSpace
+        buffer = ""
+      of '\n':
+        pieces.add LexNode(kind: lexToken, text: buffer)
+        lexingState = lexStateIndent
+        buffer = ""
+      else:
+        buffer.add c
+
+  case lexingState
+  of lexStateToken:
+    pieces.add LexNode(kind: lexToken, text: buffer)
+  of lexStateEscape:
+    raise newException(CirruParseError, "EOF at escape")
+  of lexStateString:
+    raise newException(CirruParseError, "EOF at string")
+  else:
+    discard "ok"
 
   return pieces
