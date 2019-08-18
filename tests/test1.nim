@@ -59,5 +59,8 @@ test "Lex code":
   echo lexCode("a \"b\"")
   echo lexCode("a \"b c\"")
   echo lexCode("a\n  b")
-  echo lexCode("a\n  \"b\"")
   echo lexCode("a (b c)")
+  echo lexCode("a\n  \"b\"")
+
+test "Lex indentation":
+  echo lexCode(readFile("tests/cirru/comma.cirru"))

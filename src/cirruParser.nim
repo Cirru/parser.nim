@@ -20,7 +20,8 @@ type
     controlParenOpen,
     contorlParenClose,
     controlIndent,
-    controlOutdent
+    controlOutdent,
+    controlNewline
 
   LexNode* = object
     case kind*: LexNodeKind
@@ -97,31 +98,60 @@ proc lexCode*(code: string): seq[LexNode] =
   var lexingState = lexStateIndent
   var buffer = ""
   var indentation = 0
+  var previousIndentation = 0
 
   proc digestBuffer(): void =
     pieces.add LexNode(kind: lexToken, text: buffer)
     buffer = ""
 
+  proc digestIdentation(): void =
+    let indentationChange = indentation - previousIndentation
+
+    # echo "handle indentation: ", indentation, " _ ", previousIndentation
+
+    if (indentationChange %% 2 != 0):
+      raise newException(CirruParseError, "odd indentation of {indentationChange} $indentationChange")
+    let level = indentationChange / 2
+    # echo "indentation:", level
+    if (level > 0):
+      for i in 1..level.int:
+        pieces.add LexNode(kind: lexControl, operator: controlIndent)
+    elif (level < 0):
+      for i in 1..(-level.int):
+        pieces.add LexNode(kind: lexControl, operator: controlOutdent)
+    else:
+      pieces.add LexNode(kind: lexControl, operator: controlNewline)
+
+    previousIndentation = indentation
+    # echo "previousIndentation: ", previousIndentation
+    indentation = 0
+
   for c in code:
 
-    # echo lexingState, " - ", escape($c), escape(buffer)
+    # echo escape($c), "\t", lexingState, "\t", escape(buffer)
 
     case lexingState
     of lexStateIndent:
       case c
+      of '\t':
+        raise newException(CirruParseError, "tab is not supported in Cirru")
       of ' ':
         buffer.add(' ')
         indentation += 1
       of '\n':
         indentation = 0
       of '"':
+        digestIdentation()
         buffer = ""
         lexingState = lexStateString
       of '(':
+        digestIdentation()
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
+        lexingState = lexStateSpace
       of ')':
         raise newException(CirruParseError, "Unexpeced ) in line head")
       else:
+        digestIdentation()
         buffer = $c
         lexingState = lexStateToken
     of lexStateEscape:
@@ -143,7 +173,6 @@ proc lexCode*(code: string): seq[LexNode] =
         buffer = ""
         lexingState = lexStateString
       of '\n':
-        indentation = 0
         lexingState = lexStateIndent
       of '(':
         if (buffer.len > 0):
