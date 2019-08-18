@@ -60,3 +60,4 @@ test "Lex code":
   echo lexCode("a \"b c\"")
   echo lexCode("a\n  b")
   echo lexCode("a\n  \"b\"")
+  echo lexCode("a (b c)")

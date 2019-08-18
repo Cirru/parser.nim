@@ -98,6 +98,10 @@ proc lexCode*(code: string): seq[LexNode] =
   var buffer = ""
   var indentation = 0
 
+  proc digestBuffer(): void =
+    pieces.add LexNode(kind: lexToken, text: buffer)
+    buffer = ""
+
   for c in code:
 
     # echo lexingState, " - ", escape($c), escape(buffer)
@@ -113,6 +117,10 @@ proc lexCode*(code: string): seq[LexNode] =
       of '"':
         buffer = ""
         lexingState = lexStateString
+      of '(':
+        pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
+      of ')':
+        raise newException(CirruParseError, "Unexpeced ) in line head")
       else:
         buffer = $c
         lexingState = lexStateToken
@@ -124,7 +132,7 @@ proc lexCode*(code: string): seq[LexNode] =
         lexingState = lexStateSpace
       of '"':
         lexingState = lexStateSpace
-        pieces.add LexNode(kind: lexToken, text: buffer)
+        digestBuffer()
       else:
         buffer.add c
     of lexStateSpace:
@@ -137,19 +145,35 @@ proc lexCode*(code: string): seq[LexNode] =
       of '\n':
         indentation = 0
         lexingState = lexStateIndent
+      of '(':
+        if (buffer.len > 0):
+          digestBuffer()
+        pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
+        lexingState = lexStateSpace
+      of ')':
+        pieces.add LexNode(kind: lexControl, operator: contorlParenClose)
+        digestBuffer()
+        lexingState = lexStateSpace
       else:
         buffer = $c
         lexingState = lexStateToken
     of lexStateToken:
       case c
       of ' ':
-        pieces.add LexNode(kind: lexToken, text: buffer)
+        digestBuffer()
         lexingState = lexStateSpace
-        buffer = ""
+      of '(':
+        if (buffer.len > 0):
+          digestBuffer()
+        pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
+        lexingState = lexStateSpace
+      of ')':
+        digestBuffer()
+        pieces.add LexNode(kind: lexControl, operator: contorlParenClose)
+        lexingState = lexStateSpace
       of '\n':
-        pieces.add LexNode(kind: lexToken, text: buffer)
+        digestBuffer()
         lexingState = lexStateIndent
-        buffer = ""
       else:
         buffer.add c
 
