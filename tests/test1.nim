@@ -64,3 +64,6 @@ test "Lex code":
 
 test "Lex indentation":
   echo lexCode(readFile("tests/cirru/comma.cirru"))
+
+test "Parse code":
+  echo parseCode("a")

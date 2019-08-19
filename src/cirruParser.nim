@@ -217,3 +217,19 @@ proc lexCode*(code: string): seq[LexNode] =
     discard "ok"
 
   return pieces
+
+proc digestParsingParens(parent: seq[CirruNode], tokens: seq[LexNode]): seq[CirruNode] =
+  discard "TODO"
+
+proc digestParsingIndentation(parent: seq[CirruNode], tokens: seq[LexNode]): seq[CirruNode] =
+  discard "TODO"
+
+proc parseCode*(code: string): CirruNode =
+  let tokens = lexCode(code)
+  var tree = CirruNode(kind: cirruSeq, list: @[])
+  var exprBuffer = CirruNode(kind: cirruSeq, list: @[])
+
+  while (tokens.len > 0):
+    break
+
+  return tree
