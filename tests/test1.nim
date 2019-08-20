@@ -54,16 +54,16 @@ test "Lex nodes equality":
   check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")],
                       @[LexNode(kind: lexControl, operator: controlIndent)]) == false
 
-# test "Lex code":
-#   echo lexCode("a b")
-#   echo lexCode("a \"b\"")
-#   echo lexCode("a \"b c\"")
-#   echo lexCode("a\n  b")
-#   echo lexCode("a (b c)")
-#   echo lexCode("a\n  \"b\"")
+test "Lex code":
+  echo lexCode("a b")
+  echo lexCode("a \"b\"")
+  echo lexCode("a \"b c\"")
+  echo lexCode("a\n  b")
+  echo lexCode("a (b c)")
+  echo lexCode("a\n  \"b\"")
 
-# test "Lex indentation":
-#   echo lexCode(readFile("tests/cirru/comma.cirru"))
+test "Lex indentation":
+  echo lexCode(readFile("tests/cirru/comma.cirru"))
 
 test "Parse parens":
   var a1 = @[
@@ -84,6 +84,42 @@ test "Parse parens":
   let b2 = %* ["a", ["b"]]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a2)),
                         createCirruNodeFromJson(b2))
+
+test "Parse indentation":
+  var a1 = @[
+    LexNode(kind: lexToken, text: "a"),
+    LexNode(kind: lexControl, operator: controlOutdent),
+  ]
+  let b1 = %* ["a"]
+  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a1)),
+                        createCirruNodeFromJson(b1))
+
+  var a2 = @[
+    LexNode(kind: lexToken, text: "a"),
+    LexNode(kind: lexControl, operator: controlIndent),
+    LexNode(kind: lexToken, text: "b"),
+    LexNode(kind: lexControl, operator: controlOutdent),
+    LexNode(kind: lexControl, operator: controlOutdent),
+  ]
+  let b2 = %* ["a", ["b"]]
+  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a2)),
+                        createCirruNodeFromJson(b2))
+
+  var a3 = @[
+    LexNode(kind: lexToken, text: "a"),
+    LexNode(kind: lexControl, operator: controlIndent),
+    LexNode(kind: lexToken, text: "b"),
+    LexNode(kind: lexControl, operator: controlNewline),
+    LexNode(kind: lexToken, text: "c"),
+    LexNode(kind: lexControl, operator: controlOutdent),
+    LexNode(kind: lexControl, operator: controlOutdent),
+  ]
+  let b3 = %* ["a", ["b"], "c"]
+
+  # TODO, this test not passed yet
+  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a3)),
+                        createCirruNodeFromJson(b3))
+
 
 test "Parse code":
   echo parseCode("a")

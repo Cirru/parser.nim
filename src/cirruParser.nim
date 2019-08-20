@@ -149,7 +149,7 @@ proc lexCode*(code: string): seq[LexNode] =
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
         lexingState = lexStateSpace
       of ')':
-        raise newException(CirruParseError, "Unexpeced ) in line head")
+        raise newException(CirruParseError, "Unexpected ) in line head")
       else:
         digestIdentation()
         buffer = $c
@@ -247,8 +247,43 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
 
   raise newException(CirruParseError, "Unexpected EOF parin paren")
 
-proc digestParsingIndentation(parent: seq[CirruNode], tokens: seq[LexNode]): seq[CirruNode] =
-  discard "TODO"
+proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
+  var exprs: seq[CirruNode]
+
+  while (tokens.len > 0):
+    let cursor = tokens[0]
+    case cursor.kind
+    of lexToken:
+      exprs.add CirruNode(kind: cirruString, text: cursor.text)
+      tokens.delete 0
+      continue
+    of lexControl:
+      case cursor.operator
+      of controlParenOpen:
+        tokens.delete 0
+        let children = digestParsingParens(tokens)
+        exprs.add CirruNode(kind: cirruSeq, list: children)
+        continue
+      of controlParenClose:
+        raise newException(CirruParseError, "Unexpected paren close after indentation")
+      of controlIndent:
+        tokens.delete 0
+        let children = digestParsingIndentation(tokens)
+        exprs.add CirruNode(kind: cirruSeq, list: children)
+        # special condition to check newlines
+        while (tokens.len > 0 and tokens[0].kind == lexControl and tokens[0].operator == controlNewline):
+          let lineChildren = digestParsingIndentation(tokens)
+          tokens.delete 0
+          exprs.add CirruNode(kind: cirruSeq, list: lineChildren)
+        continue
+      of controlOutdent:
+        tokens.delete 0
+        return exprs
+      of controlNewline:
+        # leave it to special while condition above
+        return exprs
+
+  return exprs
 
 proc parseCode*(code: string): CirruNode =
   let tokens = lexCode(code)
