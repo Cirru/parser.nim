@@ -54,16 +54,36 @@ test "Lex nodes equality":
   check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")],
                       @[LexNode(kind: lexControl, operator: controlIndent)]) == false
 
-test "Lex code":
-  echo lexCode("a b")
-  echo lexCode("a \"b\"")
-  echo lexCode("a \"b c\"")
-  echo lexCode("a\n  b")
-  echo lexCode("a (b c)")
-  echo lexCode("a\n  \"b\"")
+# test "Lex code":
+#   echo lexCode("a b")
+#   echo lexCode("a \"b\"")
+#   echo lexCode("a \"b c\"")
+#   echo lexCode("a\n  b")
+#   echo lexCode("a (b c)")
+#   echo lexCode("a\n  \"b\"")
 
-test "Lex indentation":
-  echo lexCode(readFile("tests/cirru/comma.cirru"))
+# test "Lex indentation":
+#   echo lexCode(readFile("tests/cirru/comma.cirru"))
+
+test "Parse parens":
+  var a1 = @[
+    LexNode(kind: lexToken, text: "a"),
+    LexNode(kind: lexToken, text: "b"),
+    LexNode(kind: lexControl, operator: controlParenClose),
+  ]
+  let b1 = %* ["a", "b"]
+  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a1)),
+                        createCirruNodeFromJson(b1))
+  var a2 = @[
+    LexNode(kind: lexToken, text: "a"),
+    LexNode(kind: lexControl, operator: controlParenOpen),
+    LexNode(kind: lexToken, text: "b"),
+    LexNode(kind: lexControl, operator: controlParenClose),
+    LexNode(kind: lexControl, operator: controlParenClose),
+  ]
+  let b2 = %* ["a", ["b"]]
+  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a2)),
+                        createCirruNodeFromJson(b2))
 
 test "Parse code":
   echo parseCode("a")
