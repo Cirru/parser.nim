@@ -74,19 +74,19 @@ test "Lex code":
 
 test "Parse parens":
   var a1 = @[
-    LexNode(kind: lexToken, text: "a"),
-    LexNode(kind: lexToken, text: "b"),
-    LexNode(kind: lexControl, operator: controlParenClose),
+    genLexToken("a"),
+    genLexToken("b"),
+    genLexControl(controlParenClose),
   ]
   let b1 = %* ["a", "b"]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a1)),
                         createCirruNodeFromJson(b1))
   var a2 = @[
-    LexNode(kind: lexToken, text: "a"),
-    LexNode(kind: lexControl, operator: controlParenOpen),
-    LexNode(kind: lexToken, text: "b"),
-    LexNode(kind: lexControl, operator: controlParenClose),
-    LexNode(kind: lexControl, operator: controlParenClose),
+    genLexToken("a"),
+    genLexControl(controlParenOpen),
+    genLexToken("b"),
+    genLexControl(controlParenClose),
+    genLexControl(controlParenClose),
   ]
   let b2 = %* ["a", ["b"]]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a2)),
@@ -94,33 +94,33 @@ test "Parse parens":
 
 test "Parse indentation":
   var a1 = @[
-    LexNode(kind: lexToken, text: "a"),
-    LexNode(kind: lexControl, operator: controlOutdent),
+    genLexToken("a"),
+    genLexControl(controlOutdent),
   ]
   let b1 = %* ["a"]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a1)),
                         createCirruNodeFromJson(b1))
 
   var a2 = @[
-    LexNode(kind: lexToken, text: "a"),
-    LexNode(kind: lexControl, operator: controlIndent),
-    LexNode(kind: lexToken, text: "b"),
-    LexNode(kind: lexControl, operator: controlOutdent),
-    LexNode(kind: lexControl, operator: controlOutdent),
+    genLexToken("a"),
+    genLexControl(controlIndent),
+    genLexToken("b"),
+    genLexControl(controlOutdent),
+    genLexControl(controlOutdent),
   ]
   let b2 = %* ["a", ["b"]]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a2)),
                         createCirruNodeFromJson(b2))
 
   var a3 = @[
-    LexNode(kind: lexToken, text: "a"),
-    LexNode(kind: lexControl, operator: controlIndent),
-    LexNode(kind: lexToken, text: "b"),
-    LexNode(kind: lexControl, operator: controlOutdent),
-    LexNode(kind: lexControl, operator: controlIndent),
-    LexNode(kind: lexToken, text: "c"),
-    LexNode(kind: lexControl, operator: controlOutdent),
-    LexNode(kind: lexControl, operator: controlOutdent),
+    genLexToken("a"),
+    genLexControl(controlIndent),
+    genLexToken("b"),
+    genLexControl(controlOutdent),
+    genLexControl(controlIndent),
+    genLexToken("c"),
+    genLexControl(controlOutdent),
+    genLexControl(controlOutdent),
   ]
   let b3 = %* ["a", ["b"], ["c"]]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a3)),
