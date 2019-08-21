@@ -36,13 +36,13 @@ type
 
 proc cirruNodesEqual*(x, y: CirruNode): bool =
   ## compare if two nodes equal
-  if (x.kind == y.kind):
-    if (x.kind == cirruString):
+  if x.kind == y.kind:
+    if x.kind == cirruString:
       return x.text == y.text
     else:
-      if (x.list.len == y.list.len):
+      if x.list.len == y.list.len:
         for k, v in x.list:
-          if (cirruNodesEqual(v, y.list[k])):
+          if cirruNodesEqual(v, y.list[k]):
             continue
           else:
             return false
@@ -53,23 +53,23 @@ proc cirruNodesEqual*(x, y: CirruNode): bool =
     return false
 
 proc lexNodesEqual*(xs, ys: seq[LexNode]): bool =
-  if (xs.len != ys.len):
+  if xs.len != ys.len:
     return false
 
-  if (xs.len == 0):
+  if xs.len == 0:
     return true
 
   for k, v in xs:
     let xi = v
     let yi = ys[k]
-    if (xi.kind != yi.kind):
+    if xi.kind != yi.kind:
       return false
     case xi.kind:
     of lexControl:
-      if (xi.operator != yi.operator):
+      if xi.operator != yi.operator:
         return false
     of lexToken:
-      if (xi.text != yi.text):
+      if xi.text != yi.text:
         return false
 
   return true

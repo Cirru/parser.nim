@@ -17,18 +17,18 @@ proc lexCode*(code: string): seq[LexNode] =
 
     # echo "handle indentation: ", indentation, " _ ", previousIndentation
 
-    if (indentationChange %% 2 != 0):
+    if indentationChange %% 2 != 0:
       raise newException(CirruParseError, "odd indentation of {indentationChange} $indentationChange")
     let level = indentationChange / 2
     # echo "indentation:", level
-    if (level > 0):
+    if level > 0:
       for i in 1..level.int:
         pieces.add LexNode(kind: lexControl, operator: controlIndent)
-    elif (level < 0):
+    elif level < 0:
       for i in 1..(-level.int):
         pieces.add LexNode(kind: lexControl, operator: controlOutdent)
     else:
-      if (pieces.len > 0):
+      if pieces.len > 0:
         pieces.add LexNode(kind: lexControl, operator: controlOutdent)
         pieces.add LexNode(kind: lexControl, operator: controlIndent)
 
@@ -85,7 +85,7 @@ proc lexCode*(code: string): seq[LexNode] =
       of '\n':
         lexingState = lexStateIndent
       of '(':
-        if (buffer.len > 0):
+        if buffer.len > 0:
           digestBuffer()
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
         lexingState = lexStateSpace
@@ -102,7 +102,7 @@ proc lexCode*(code: string): seq[LexNode] =
         digestBuffer()
         lexingState = lexStateSpace
       of '(':
-        if (buffer.len > 0):
+        if buffer.len > 0:
           digestBuffer()
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
         lexingState = lexStateSpace

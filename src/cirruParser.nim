@@ -6,7 +6,7 @@ import cirruParser/lexer
 proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
 
-  while (tokens.len > 0):
+  while tokens.len > 0:
     let cursor = tokens[0]
     case cursor.kind
     of lexToken:
@@ -33,7 +33,7 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
 proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
 
-  while (tokens.len > 0):
+  while tokens.len > 0:
     let cursor = tokens[0]
     case cursor.kind
     of lexToken:
@@ -65,7 +65,7 @@ proc parseCode*(code: string): CirruNode =
   var tree = CirruNode(kind: cirruSeq, list: @[])
   var exprBuffer = CirruNode(kind: cirruSeq, list: @[])
 
-  while (tokens.len > 0):
+  while tokens.len > 0:
     break
 
   return tree
