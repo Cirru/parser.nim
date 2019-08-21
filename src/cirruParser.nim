@@ -20,8 +20,7 @@ type
     controlParenOpen,
     controlParenClose,
     controlIndent,
-    controlOutdent,
-    controlNewline
+    controlOutdent
 
   LexNode* = object
     case kind*: LexNodeKind
@@ -120,7 +119,9 @@ proc lexCode*(code: string): seq[LexNode] =
       for i in 1..(-level.int):
         pieces.add LexNode(kind: lexControl, operator: controlOutdent)
     else:
-      pieces.add LexNode(kind: lexControl, operator: controlNewline)
+      if (pieces.len > 0):
+        pieces.add LexNode(kind: lexControl, operator: controlOutdent)
+        pieces.add LexNode(kind: lexControl, operator: controlIndent)
 
     previousIndentation = indentation
     # echo "previousIndentation: ", previousIndentation
@@ -242,8 +243,6 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
         raise newException(CirruParseError, "Should not have indentation before paren close")
       of controlOutdent:
         raise newException(CirruParseError, "Should not have outdentation before paren close")
-      of controlNewline:
-        raise newException(CirruParseError, "Should not have newline before paren close")
 
   raise newException(CirruParseError, "Unexpected EOF parin paren")
 
@@ -270,17 +269,9 @@ proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
         tokens.delete 0
         let children = digestParsingIndentation(tokens)
         exprs.add CirruNode(kind: cirruSeq, list: children)
-        # special condition to check newlines
-        while (tokens.len > 0 and tokens[0].kind == lexControl and tokens[0].operator == controlNewline):
-          let lineChildren = digestParsingIndentation(tokens)
-          tokens.delete 0
-          exprs.add CirruNode(kind: cirruSeq, list: lineChildren)
         continue
       of controlOutdent:
         tokens.delete 0
-        return exprs
-      of controlNewline:
-        # leave it to special while condition above
         return exprs
 
   return exprs

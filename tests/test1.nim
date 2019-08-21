@@ -46,24 +46,31 @@ test "Cirru from JSON":
   let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: @[])])
   check cirruNodesEqual(createCirruNodeFromJson(jsonNested), nodeOfNested)
 
+proc genLexToken(text: string): LexNode =
+  return LexNode(kind: lexToken, text: text)
+
+proc genLexControl(operator: ControlOperator): LexNode =
+  return LexNode(kind: lexControl, operator: operator)
+
 test "Lex nodes equality":
-  check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")], @[LexNode(kind: lexToken, text: "a")])
-  check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")], @[LexNode(kind: lexToken, text: "b")]) == false
-  check lexNodesEqual(@[LexNode(kind: lexControl, operator: controlIndent)],
-                      @[LexNode(kind: lexControl, operator: controlIndent)])
-  check lexNodesEqual(@[LexNode(kind: lexToken, text: "a")],
-                      @[LexNode(kind: lexControl, operator: controlIndent)]) == false
+  check lexNodesEqual(@[genLexToken("a")], @[genLexToken("a")])
+  check lexNodesEqual(@[genLexToken("a")], @[genLexToken("b")]) == false
+  check lexNodesEqual(@[genLexControl(controlIndent)],
+                      @[genLexControl(controlIndent)])
+  check lexNodesEqual(@[genLexToken("a")],
+                      @[genLexControl(controlIndent)]) == false
 
 test "Lex code":
-  echo lexCode("a b")
-  echo lexCode("a \"b\"")
-  echo lexCode("a \"b c\"")
-  echo lexCode("a\n  b")
-  echo lexCode("a (b c)")
-  echo lexCode("a\n  \"b\"")
+  check lexNodesEqual(lexCode("a b"), @[genLexToken("a"), genLexToken("b")])
+  check lexNodesEqual(lexCode("a \"b\""), @[genLexToken("a"), genLexToken("b")])
+  check lexNodesEqual(lexCode("a \"b c\""), @[genLexToken("a"), genLexToken("b c")])
+  check lexNodesEqual(lexCode("a\n  b"), @[genLexToken("a"), genLexControl(controlIndent), genLexToken("b")])
+  check lexNodesEqual(lexCode("a (b c)"), @[genLexToken("a"), genLexControl(controlParenOpen),
+                                            genLexToken("b"), genLexToken("c"), genLexControl(controlParenClose)])
+  check lexNodesEqual(lexCode("a\n  \"b\""), @[genLexToken("a"), genLexControl(controlIndent), genLexToken("b")])
 
-test "Lex indentation":
-  echo lexCode(readFile("tests/cirru/comma.cirru"))
+# test "Lex indentation":
+#   echo lexCode(readFile("tests/cirru/comma.cirru"))
 
 test "Parse parens":
   var a1 = @[
@@ -109,14 +116,13 @@ test "Parse indentation":
     LexNode(kind: lexToken, text: "a"),
     LexNode(kind: lexControl, operator: controlIndent),
     LexNode(kind: lexToken, text: "b"),
-    LexNode(kind: lexControl, operator: controlNewline),
+    LexNode(kind: lexControl, operator: controlOutdent),
+    LexNode(kind: lexControl, operator: controlIndent),
     LexNode(kind: lexToken, text: "c"),
     LexNode(kind: lexControl, operator: controlOutdent),
     LexNode(kind: lexControl, operator: controlOutdent),
   ]
-  let b3 = %* ["a", ["b"], "c"]
-
-  # TODO, this test not passed yet
+  let b3 = %* ["a", ["b"], ["c"]]
   check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a3)),
                         createCirruNodeFromJson(b3))
 
