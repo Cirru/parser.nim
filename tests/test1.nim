@@ -3,6 +3,9 @@ import unittest
 import json
 
 import cirruParser
+import cirruParser/types
+import cirruParser/helpers
+import cirruParser/lexer
 import typetraits
 
 # test "read line":
