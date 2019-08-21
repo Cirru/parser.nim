@@ -18,10 +18,9 @@ type
 
   ControlOperator* = enum
     controlParenOpen,
-    contorlParenClose,
+    controlParenClose,
     controlIndent,
-    controlOutdent,
-    controlNewline
+    controlOutdent
 
   LexNode* = object
     case kind*: LexNodeKind
@@ -120,7 +119,9 @@ proc lexCode*(code: string): seq[LexNode] =
       for i in 1..(-level.int):
         pieces.add LexNode(kind: lexControl, operator: controlOutdent)
     else:
-      pieces.add LexNode(kind: lexControl, operator: controlNewline)
+      if (pieces.len > 0):
+        pieces.add LexNode(kind: lexControl, operator: controlOutdent)
+        pieces.add LexNode(kind: lexControl, operator: controlIndent)
 
     previousIndentation = indentation
     # echo "previousIndentation: ", previousIndentation
@@ -149,7 +150,7 @@ proc lexCode*(code: string): seq[LexNode] =
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
         lexingState = lexStateSpace
       of ')':
-        raise newException(CirruParseError, "Unexpeced ) in line head")
+        raise newException(CirruParseError, "Unexpected ) in line head")
       else:
         digestIdentation()
         buffer = $c
@@ -180,7 +181,7 @@ proc lexCode*(code: string): seq[LexNode] =
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
         lexingState = lexStateSpace
       of ')':
-        pieces.add LexNode(kind: lexControl, operator: contorlParenClose)
+        pieces.add LexNode(kind: lexControl, operator: controlParenClose)
         digestBuffer()
         lexingState = lexStateSpace
       else:
@@ -198,7 +199,7 @@ proc lexCode*(code: string): seq[LexNode] =
         lexingState = lexStateSpace
       of ')':
         digestBuffer()
-        pieces.add LexNode(kind: lexControl, operator: contorlParenClose)
+        pieces.add LexNode(kind: lexControl, operator: controlParenClose)
         lexingState = lexStateSpace
       of '\n':
         digestBuffer()
@@ -217,3 +218,70 @@ proc lexCode*(code: string): seq[LexNode] =
     discard "ok"
 
   return pieces
+
+proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
+  var exprs: seq[CirruNode]
+
+  while (tokens.len > 0):
+    let cursor = tokens[0]
+    case cursor.kind
+    of lexToken:
+      exprs.add CirruNode(kind: cirruString, text: cursor.text)
+      tokens.delete 0
+      continue
+    of lexControl:
+      case cursor.operator
+      of controlParenOpen:
+        tokens.delete 0
+        let children = digestParsingParens(tokens)
+        exprs.add CirruNode(kind: cirruSeq, list: children)
+        continue
+      of controlParenClose:
+        tokens.delete 0
+        return exprs
+      of controlIndent:
+        raise newException(CirruParseError, "Should not have indentation before paren close")
+      of controlOutdent:
+        raise newException(CirruParseError, "Should not have outdentation before paren close")
+
+  raise newException(CirruParseError, "Unexpected EOF parin paren")
+
+proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
+  var exprs: seq[CirruNode]
+
+  while (tokens.len > 0):
+    let cursor = tokens[0]
+    case cursor.kind
+    of lexToken:
+      exprs.add CirruNode(kind: cirruString, text: cursor.text)
+      tokens.delete 0
+      continue
+    of lexControl:
+      case cursor.operator
+      of controlParenOpen:
+        tokens.delete 0
+        let children = digestParsingParens(tokens)
+        exprs.add CirruNode(kind: cirruSeq, list: children)
+        continue
+      of controlParenClose:
+        raise newException(CirruParseError, "Unexpected paren close after indentation")
+      of controlIndent:
+        tokens.delete 0
+        let children = digestParsingIndentation(tokens)
+        exprs.add CirruNode(kind: cirruSeq, list: children)
+        continue
+      of controlOutdent:
+        tokens.delete 0
+        return exprs
+
+  return exprs
+
+proc parseCode*(code: string): CirruNode =
+  let tokens = lexCode(code)
+  var tree = CirruNode(kind: cirruSeq, list: @[])
+  var exprBuffer = CirruNode(kind: cirruSeq, list: @[])
+
+  while (tokens.len > 0):
+    break
+
+  return tree
