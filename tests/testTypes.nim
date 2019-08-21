@@ -6,14 +6,6 @@ import cirruParser
 import cirruParser/types
 import cirruParser/helpers
 import cirruParser/lexer
-import typetraits
-
-# test "read line":
-#   let dataCode = readFile("tests/data/line.json")
-#   let sourceCode = readFile("tests/cirru/line.cirru")
-  # echo parseJson(dataCode)
-  # echo sourceCode
-  # check (dataCode != "")
 
 test "nodes comparing":
   let a1 = CirruNode(kind: cirruString, text: "a")

@@ -9,8 +9,9 @@ proc lexCode*(code: string): seq[LexNode] =
   var previousIndentation = 0
 
   proc digestBuffer(): void =
-    pieces.add LexNode(kind: lexToken, text: buffer)
-    buffer = ""
+    if buffer.len > 0:
+      pieces.add LexNode(kind: lexToken, text: buffer)
+      buffer = ""
 
   proc digestIdentation(): void =
     let indentationChange = indentation - previousIndentation
@@ -27,6 +28,10 @@ proc lexCode*(code: string): seq[LexNode] =
     elif level < 0:
       for i in 1..(-level.int):
         pieces.add LexNode(kind: lexControl, operator: controlOutdent)
+      # special logic to generate extra newline ops
+      pieces.add LexNode(kind: lexControl, operator: controlOutdent)
+      pieces.add LexNode(kind: lexControl, operator: controlIndent)
+
     else:
       if pieces.len > 0:
         pieces.add LexNode(kind: lexControl, operator: controlOutdent)
@@ -66,13 +71,16 @@ proc lexCode*(code: string): seq[LexNode] =
         lexingState = lexStateToken
     of lexStateEscape:
       buffer.add c
+      lexingState = lexStateString
     of lexStateString:
       case c
       of '\\':
-        lexingState = lexStateSpace
+        lexingState = lexStateEscape
       of '"':
         lexingState = lexStateSpace
-        digestBuffer()
+        # special case, add even if token is empty
+        pieces.add LexNode(kind: lexToken, text: buffer)
+        buffer = ""
       else:
         buffer.add c
     of lexStateSpace:

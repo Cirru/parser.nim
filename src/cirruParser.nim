@@ -61,11 +61,24 @@ proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
   return exprs
 
 proc parseCode*(code: string): CirruNode =
-  let tokens = lexCode(code)
-  var tree = CirruNode(kind: cirruSeq, list: @[])
-  var exprBuffer = CirruNode(kind: cirruSeq, list: @[])
+  var tokens = lexCode(code)
+  var lines: seq[CirruNode]
+
+  # echo "tokens: ", tokens
+
+  if tokens.len == 0:
+    raise newException(CirruParseError, "Empty nodes")
+
+  let firstExpr = digestParsingIndentation(tokens)
+  lines.add CirruNode(kind: cirruSeq, list: firstExpr)
 
   while tokens.len > 0:
-    break
+    if tokens[0].kind == lexControl and tokens[0].operator == controlIndent:
+      tokens.delete 0
+      let children = digestParsingIndentation(tokens)
+      lines.add CirruNode(kind: cirruSeq, list: children)
+    else:
+      echo tokens
+      raise newException(CirruParseError, "Unexpected tokens sequence!")
 
-  return tree
+  return CirruNode(kind: cirruSeq, list: lines)

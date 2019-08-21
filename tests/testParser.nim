@@ -5,7 +5,6 @@ import cirruParser
 import cirruParser/types
 import cirruParser/helpers
 import cirruParser/lexer
-import typetraits
 
 test "Parse parens":
   var a1 = @[
@@ -62,5 +61,12 @@ test "Parse indentation":
                         createCirruNodeFromJson(b3))
 
 
-test "Parse code":
-  echo parseCode("a")
+test "Parse simple program":
+  let a1 = %* [["a"], ["b"]]
+  check cirruNodesEqual(parseCode("a\nb"), createCirruNodeFromJson(a1))
+
+  let a2 = %* [["a"], ["b", ["c"]]]
+  check cirruNodesEqual(parseCode("a\nb\n  c"), createCirruNodeFromJson(a2))
+
+  let a3 = %* [["a", ["b"]], ["c"]]
+  check cirruNodesEqual(parseCode("a\n  b\nc"), createCirruNodeFromJson(a3))
