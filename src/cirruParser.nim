@@ -2,6 +2,7 @@ import strutils
 import json
 import cirruParser/types
 import cirruParser/lexer
+import cirruParser/transformer
 
 proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
@@ -81,4 +82,4 @@ proc parseCode*(code: string): CirruNode =
       echo tokens
       raise newException(CirruParseError, "Unexpected tokens sequence!")
 
-  return CirruNode(kind: cirruSeq, list: lines)
+  return resolveComma(resolveDollar(CirruNode(kind: cirruSeq, list: lines)))
