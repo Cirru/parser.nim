@@ -61,7 +61,7 @@ proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
 
   return exprs
 
-proc parseCode*(code: string): CirruNode =
+proc parseCirru*(code: string): CirruNode =
   var tokens = lexCode(code)
   var lines: seq[CirruNode]
 
