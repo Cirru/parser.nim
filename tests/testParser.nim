@@ -13,8 +13,7 @@ test "Parse parens":
     genLexControl(controlParenClose),
   ]
   let b1 = %* ["a", "b"]
-  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a1)),
-                        createCirruNodeFromJson(b1))
+  check (CirruNode(kind: cirruSeq, list: digestParsingParens(a1)) == toCirru(b1))
   var a2 = @[
     genLexToken("a"),
     genLexControl(controlParenOpen),
@@ -23,8 +22,7 @@ test "Parse parens":
     genLexControl(controlParenClose),
   ]
   let b2 = %* ["a", ["b"]]
-  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingParens(a2)),
-                        createCirruNodeFromJson(b2))
+  check (CirruNode(kind: cirruSeq, list: digestParsingParens(a2)) == toCirru(b2))
 
 test "Parse indentation":
   var a1 = @[
@@ -32,8 +30,7 @@ test "Parse indentation":
     genLexControl(controlOutdent),
   ]
   let b1 = %* ["a"]
-  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a1)),
-                        createCirruNodeFromJson(b1))
+  check (CirruNode(kind: cirruSeq, list: digestParsingIndentation(a1)) == toCirru(b1))
 
   var a2 = @[
     genLexToken("a"),
@@ -43,8 +40,7 @@ test "Parse indentation":
     genLexControl(controlOutdent),
   ]
   let b2 = %* ["a", ["b"]]
-  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a2)),
-                        createCirruNodeFromJson(b2))
+  check (CirruNode(kind: cirruSeq, list: digestParsingIndentation(a2)) == toCirru(b2))
 
   var a3 = @[
     genLexToken("a"),
@@ -57,16 +53,15 @@ test "Parse indentation":
     genLexControl(controlOutdent),
   ]
   let b3 = %* ["a", ["b"], ["c"]]
-  check cirruNodesEqual(CirruNode(kind: cirruSeq, list: digestParsingIndentation(a3)),
-                        createCirruNodeFromJson(b3))
+  check (CirruNode(kind: cirruSeq, list: digestParsingIndentation(a3)) == toCirru(b3))
 
 
 test "Parse simple program":
   let a1 = %* [["a"], ["b"]]
-  check cirruNodesEqual(parseCirru("a\nb"), createCirruNodeFromJson(a1))
+  check (parseCirru("a\nb") == toCirru(a1))
 
   let a2 = %* [["a"], ["b", ["c"]]]
-  check cirruNodesEqual(parseCirru("a\nb\n  c"), createCirruNodeFromJson(a2))
+  check (parseCirru("a\nb\n  c") == toCirru(a2))
 
   let a3 = %* [["a", ["b"]], ["c"]]
-  check cirruNodesEqual(parseCirru("a\n  b\nc"), createCirruNodeFromJson(a3))
+  check (parseCirru("a\n  b\nc") == toCirru(a3))

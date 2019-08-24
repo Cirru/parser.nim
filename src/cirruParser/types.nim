@@ -34,7 +34,7 @@ type
 
   CirruParseError* = object of Exception
 
-proc cirruNodesEqual*(x, y: CirruNode): bool =
+proc cirruNodesEqual(x, y: CirruNode): bool =
   ## compare if two nodes equal
   if x.kind == y.kind:
     if x.kind == cirruString:
@@ -52,7 +52,15 @@ proc cirruNodesEqual*(x, y: CirruNode): bool =
   else:
     return false
 
-proc lexNodesEqual*(xs, ys: seq[LexNode]): bool =
+proc `==`*(x, y: CirruNode): bool =
+  # overload equality function
+  return cirruNodesEqual(x, y)
+
+proc `!=`*(x, y: CirruNode): bool =
+  # overload equality function
+  return not cirruNodesEqual(x, y)
+
+proc lexNodesEqual(xs, ys: seq[LexNode]): bool =
   if xs.len != ys.len:
     return false
 
@@ -73,3 +81,12 @@ proc lexNodesEqual*(xs, ys: seq[LexNode]): bool =
         return false
 
   return true
+
+
+proc `==`*(x, y: seq[LexNode]): bool =
+  # overload equality function
+  return lexNodesEqual(x, y)
+
+proc `!=`*(x, y: seq[LexNode]): bool =
+  # overload equality function
+  return not lexNodesEqual(x, y)
