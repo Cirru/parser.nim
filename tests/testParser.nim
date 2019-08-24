@@ -63,10 +63,10 @@ test "Parse indentation":
 
 test "Parse simple program":
   let a1 = %* [["a"], ["b"]]
-  check cirruNodesEqual(parseCode("a\nb"), createCirruNodeFromJson(a1))
+  check cirruNodesEqual(parseCirru("a\nb"), createCirruNodeFromJson(a1))
 
   let a2 = %* [["a"], ["b", ["c"]]]
-  check cirruNodesEqual(parseCode("a\nb\n  c"), createCirruNodeFromJson(a2))
+  check cirruNodesEqual(parseCirru("a\nb\n  c"), createCirruNodeFromJson(a2))
 
   let a3 = %* [["a", ["b"]], ["c"]]
-  check cirruNodesEqual(parseCode("a\n  b\nc"), createCirruNodeFromJson(a3))
+  check cirruNodesEqual(parseCirru("a\n  b\nc"), createCirruNodeFromJson(a3))
