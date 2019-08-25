@@ -7,35 +7,28 @@ import cirruParser/transformer
 
 test "transform dollars":
   let a1 = %* ["a"]
-  check cirruNodesEqual(resolveDollar(createCirruNodeFromJson(a1)),
-                        createCirruNodeFromJson(a1))
+  check (resolveDollar(toCirru(a1)) == toCirru(a1))
 
   let a2 = %* ["a", "$"]
   let b2 = %* ["a", []]
-  check cirruNodesEqual(resolveDollar(createCirruNodeFromJson(a2)),
-                        createCirruNodeFromJson(b2))
+  check (resolveDollar(toCirru(a2)) == toCirru(b2))
 
   let a3 = %* ["a", "$", "b"]
   let b3 = %* ["a", ["b"]]
-  check cirruNodesEqual(resolveDollar(createCirruNodeFromJson(a3)),
-                        createCirruNodeFromJson(b3))
+  check (resolveDollar(toCirru(a3)) == toCirru(b3))
 
   let a4 = %* ["a", "$", "$", "b"]
   let b4 = %* ["a", [["b"]]]
-  check cirruNodesEqual(resolveDollar(createCirruNodeFromJson(a4)),
-                        createCirruNodeFromJson(b4))
+  check (resolveDollar(toCirru(a4)) == toCirru(b4))
 
 test "transform commas":
   let a1 = %* ["a"]
-  check cirruNodesEqual(resolveComma(createCirruNodeFromJson(a1)),
-                        createCirruNodeFromJson(a1))
+  check (resolveComma(toCirru(a1)) == toCirru(a1))
 
   let a2 = %* ["a", [",", "b"]]
   let b2 = %* ["a", "b"]
-  check cirruNodesEqual(resolveComma(createCirruNodeFromJson(a2)),
-                        createCirruNodeFromJson(b2))
+  check (resolveComma(toCirru(a2)) == toCirru(b2))
 
   let a3 = %* ["a", [",", "b", [",", "c"]]]
   let b3 = %* ["a", "b", "c"]
-  check cirruNodesEqual(resolveComma(createCirruNodeFromJson(a3)),
-                        createCirruNodeFromJson(b3))
+  check (resolveComma(toCirru(a3)) == toCirru(b3))
