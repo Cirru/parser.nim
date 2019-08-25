@@ -4,6 +4,8 @@ import cirruParser/types
 import cirruParser/lexer
 import cirruParser/transformer
 
+export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`
+
 proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
 
