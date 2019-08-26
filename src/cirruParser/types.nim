@@ -34,10 +34,16 @@ type
 
   CirruParseError* = object of Exception
 
+proc isToken*(x: CirruNode): bool =
+  x.kind == cirruString
+
+proc isSeq*(x: CirruNode): bool =
+  x.kind == cirruSeq
+
 proc cirruNodesEqual(x, y: CirruNode): bool =
   ## compare if two nodes equal
   if x.kind == y.kind:
-    if x.kind == cirruString:
+    if x.isToken():
       return x.text == y.text
     else:
       if x.list.len == y.list.len:
