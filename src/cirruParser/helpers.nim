@@ -16,7 +16,7 @@ proc toCirru*(xs: JsonNode): CirruNode =
       return CirruNode(kind: cirruString, text: xs.str)
     else:
       echo xs
-      raise newException(CirruParseError, "Unknown type in JSON")
+      raiseParseException("Unknown type in JSON", 0, 0)
 
 proc genLexToken*(text: string): LexNode =
   return LexNode(kind: lexToken, text: text)

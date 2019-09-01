@@ -19,7 +19,7 @@ proc lexCode*(code: string): seq[LexNode] =
     # echo "handle indentation: ", indentation, " _ ", previousIndentation
 
     if indentationChange %% 2 != 0:
-      raise newException(CirruParseError, "odd indentation of {indentationChange} $indentationChange")
+      raiseParseException("odd indentation of {indentationChange} $indentationChange", 0, 0)
     let level = indentationChange / 2
     # echo "indentation:", level
     if level > 0:
@@ -49,7 +49,7 @@ proc lexCode*(code: string): seq[LexNode] =
     of lexStateIndent:
       case c
       of '\t':
-        raise newException(CirruParseError, "tab is not supported in Cirru")
+        raiseParseException("tab is not supported in Cirru", 0, 0)
       of ' ':
         buffer.add(' ')
         indentation += 1
@@ -64,7 +64,7 @@ proc lexCode*(code: string): seq[LexNode] =
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen)
         lexingState = lexStateSpace
       of ')':
-        raise newException(CirruParseError, "Unexpected ) in line head")
+        raiseParseException("Unexpected ) in line head", 0, 0)
       else:
         digestIdentation()
         buffer = $c
@@ -128,9 +128,9 @@ proc lexCode*(code: string): seq[LexNode] =
   of lexStateToken:
     pieces.add LexNode(kind: lexToken, text: buffer)
   of lexStateEscape:
-    raise newException(CirruParseError, "EOF at escape")
+    raiseParseException("EOF at escape", 0, 0)
   of lexStateString:
-    raise newException(CirruParseError, "EOF at string")
+    raiseParseException("EOF at string", 0, 0)
   else:
     discard "ok"
 
