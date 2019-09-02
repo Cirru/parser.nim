@@ -6,9 +6,13 @@ type
     cirruSeq
 
   CirruNode* = object
+    line*: int
+    column*: int
     case kind*: CirruNodeKind
-    of cirruString: text*: string
-    of cirruSeq: list*: seq[CirruNode]
+    of cirruString:
+      text*: string
+    of cirruSeq:
+      list*: seq[CirruNode]
 
   LexNodeKind* = enum
     lexToken,
@@ -21,6 +25,8 @@ type
     controlOutdent
 
   LexNode* = object
+    line*: int
+    column*: int
     case kind*: LexNodeKind
     of lexToken: text*: string
     of lexControl: operator*: ControlOperator
@@ -32,7 +38,17 @@ type
     lexStateEscape,
     lexStateIndent
 
-  CirruParseError* = object of Exception
+  CirruParseError* = ref object of Exception
+    line*: int
+    column*: int
+
+proc raiseParseException*(msg: string, line, column: int) =
+  var e: CirruParseError
+  new(e)
+  e.msg = msg
+  e.line = line
+  e.column = column
+  raise e
 
 proc isToken*(x: CirruNode): bool =
   x.kind == cirruString
