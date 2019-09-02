@@ -14,7 +14,7 @@ test "Line number results":
   try:
     echo lexCode(code)
   except CirruParseError as e:
-    echo formatParserFailure(code, e.msg, e.line, e.column)
+    echo formatParserFailure(code, e.msg, "tmp", e.line, e.column)
 
   echo()
 
@@ -22,7 +22,7 @@ test "Line number results":
   try:
     echo lexCode(code2)
   except CirruParseError as e:
-    echo formatParserFailure(code2, e.msg, e.line, e.column)
+    echo formatParserFailure(code2, e.msg, "tmp", e.line, e.column)
 
   echo()
 
@@ -30,6 +30,6 @@ test "Line number results":
   try:
     echo parseCirru(code3)
   except CirruParseError as e:
-    echo formatParserFailure(code3, e.msg, e.line, e.column)
+    echo formatParserFailure(code3, e.msg, "tmp", e.line, e.column)
 
   echo()
