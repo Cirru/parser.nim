@@ -17,7 +17,7 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
             buffer.add CirruNode(kind: cirruSeq, list: following.list)
             break
           of cirruString:
-            raiseParseException("Should not return cirruString", 0, 0)
+            raiseParseException("Should not return cirruString", following.line, following.column)
         else:
           buffer.add child
       of cirruSeq:

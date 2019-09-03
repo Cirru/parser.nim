@@ -1,5 +1,6 @@
 
 import json
+import strutils
 import cirruParser/types
 
 proc createCirruString*(x: string): CirruNode =
@@ -23,3 +24,8 @@ proc genLexToken*(text: string): LexNode =
 
 proc genLexControl*(operator: ControlOperator): LexNode =
   return LexNode(kind: lexControl, operator: operator)
+
+proc formatParserFailure*(code, msg, filename: string, line, column: int): string =
+  let failureLine = splitLines(code)[line - 1]
+  let spaces = '-'.repeat(column - 1).join("")
+  return "At " & filename & ":" & $line & ":" & $column & "\n" & failureLine & "\n" & spaces & "^ " & msg

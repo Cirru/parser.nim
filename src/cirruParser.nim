@@ -27,11 +27,11 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
         tokens.delete 0
         return exprs
       of controlIndent:
-        raiseParseException("Should not have indentation before paren close", 0, 0)
+        raiseParseException("Should not have indentation before paren close", cursor.line, cursor.column)
       of controlOutdent:
-        raiseParseException("Should not have outdentation before paren close", 0, 0)
+        raiseParseException("Should not have outdentation before paren close", cursor.line, cursor.column)
 
-  raiseParseException("Unexpected EOF parin paren", 0, 0)
+  raiseParseException("Unexpected EOF in paren", 0, 0)
 
 proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
@@ -51,7 +51,7 @@ proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
         exprs.add CirruNode(kind: cirruSeq, list: children)
         continue
       of controlParenClose:
-        raiseParseException("Unexpected paren close after indentation", 0, 0)
+        raiseParseException("Unexpected paren close inside a line", cursor.line, cursor.column)
 
       of controlIndent:
         tokens.delete 0
@@ -83,6 +83,6 @@ proc parseCirru*(code: string): CirruNode =
       lines.add CirruNode(kind: cirruSeq, list: children)
     else:
       echo tokens
-      raiseParseException("Unexpected tokens sequence!", 0, 0)
+      raiseParseException("Unexpected tokens sequence!", tokens[0].line, tokens[0].column)
 
   return resolveComma(resolveDollar(CirruNode(kind: cirruSeq, list: lines)))

@@ -1,6 +1,7 @@
 
 import cirruParser/types
 import strutils
+import strformat
 
 proc lexCode*(code: string): seq[LexNode] =
   var pieces: seq[LexNode]
@@ -22,7 +23,7 @@ proc lexCode*(code: string): seq[LexNode] =
     # echo "handle indentation: ", indentation, " _ ", previousIndentation
 
     if indentationChange %% 2 != 0:
-      raiseParseException("odd indentation of {indentationChange} $indentationChange", line, column)
+      raiseParseException(fmt("odd indentation of {indentationChange}"), line, column)
     let level = indentationChange / 2
     # echo "indentation:", level
     if level > 0:
