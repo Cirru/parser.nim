@@ -5,9 +5,16 @@ import cirruParser/lexer
 import cirruParser/helpers
 import cirruParser
 
-test "Line number results":
+test "Nodes has position info":
+  echo()
   echo lexCode("a\n  b")
 
+  echo()
+  echo parseCirru("a\n  b")
+  echo()
+
+
+test "Line number results":
   echo()
 
   let code = "a \""
