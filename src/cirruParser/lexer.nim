@@ -48,6 +48,12 @@ proc lexCode*(code: string): seq[LexNode] =
   for c in code:
 
     # echo escape($c), "\t", lexingState, "\t", escape(buffer)
+    if c == '\n':
+      line = line + 1
+      column = 0
+    else:
+      column = column + 1
+    # echo "tracing ", escape($c), line, " ", column
 
     case lexingState
     of lexStateIndent:
@@ -127,14 +133,6 @@ proc lexCode*(code: string): seq[LexNode] =
         lexingState = lexStateIndent
       else:
         buffer.add c
-
-    # still looping
-    if c == '\n':
-      line = line + 1
-      column = 0
-    else:
-      column = column + 1
-    # echo "tracing ", escape($c), line, " ", column
 
   case lexingState
   of lexStateToken:

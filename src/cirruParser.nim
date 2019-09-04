@@ -9,8 +9,14 @@ export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`
 proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
 
+  var lastToken: LexNode
+
   while tokens.len > 0:
     let cursor = tokens[0]
+
+    # recorded for generating error messages
+    lastToken = cursor
+
     case cursor.kind
     of lexToken:
       exprs.add CirruNode(kind: cirruString, text: cursor.text)
@@ -31,7 +37,7 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
       of controlOutdent:
         raiseParseException("Should not have outdentation before paren close", cursor.line, cursor.column)
 
-  raiseParseException("Unexpected EOF in paren", 0, 0)
+  raiseParseException("Unexpected EOF in paren", lastToken.line, lastToken.column)
 
 proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
@@ -71,7 +77,7 @@ proc parseCirru*(code: string): CirruNode =
   # echo "tokens: ", tokens
 
   if tokens.len == 0:
-    raiseParseException("Empty nodes", 0, 0)
+    return CirruNode(kind: cirruSeq, list: @[])
 
   let firstExpr = digestParsingIndentation(tokens)
   lines.add CirruNode(kind: cirruSeq, list: firstExpr)
