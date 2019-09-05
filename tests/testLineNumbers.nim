@@ -5,9 +5,16 @@ import cirruParser/lexer
 import cirruParser/helpers
 import cirruParser
 
-test "Line number results":
+test "Nodes has position info":
+  echo()
   echo lexCode("a\n  b")
 
+  echo()
+  echo parseCirru("a\n  b")
+  echo()
+
+
+test "Line number results":
   echo()
 
   let code = "a \""
@@ -31,5 +38,13 @@ test "Line number results":
     echo parseCirru(code3)
   except CirruParseError as e:
     echo formatParserFailure(code3, e.msg, "tmp", e.line, e.column)
+
+  echo()
+
+  let code4 = "a (a b"
+  try:
+    echo parseCirru(code4)
+  except CirruParseError as e:
+    echo formatParserFailure(code4, e.msg, "tmp", e.line, e.column)
 
   echo()

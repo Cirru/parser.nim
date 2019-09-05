@@ -2,6 +2,7 @@
 import json
 import strutils
 import cirruParser/types
+import math
 
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)
@@ -17,7 +18,7 @@ proc toCirru*(xs: JsonNode): CirruNode =
       return CirruNode(kind: cirruString, text: xs.str)
     else:
       echo xs
-      raiseParseException("Unknown type in JSON", 0, 0)
+      raiseParseException("Unknown type in JSON", 1, 0)
 
 proc genLexToken*(text: string): LexNode =
   return LexNode(kind: lexToken, text: text)
@@ -27,5 +28,5 @@ proc genLexControl*(operator: ControlOperator): LexNode =
 
 proc formatParserFailure*(code, msg, filename: string, line, column: int): string =
   let failureLine = splitLines(code)[line - 1]
-  let spaces = '-'.repeat(column - 1).join("")
+  let spaces = '-'.repeat(max(0, column - 1)).join("")
   return "At " & filename & ":" & $line & ":" & $column & "\n" & failureLine & "\n" & spaces & "^ " & msg

@@ -11,10 +11,10 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
       case child.kind
       of cirruString:
         if child.text == "$":
-          let following = resolveDollar(CirruNode(kind: cirruSeq, list: expr.list[(k+1)..^1]))
+          let following = resolveDollar(CirruNode(kind: cirruSeq, list: expr.list[(k+1)..^1], line: child.line, column: child.column))
           case following.kind
           of cirruSeq:
-            buffer.add CirruNode(kind: cirruSeq, list: following.list)
+            buffer.add CirruNode(kind: cirruSeq, list: following.list, line: child.line, column: child.column)
             break
           of cirruString:
             raiseParseException("Should not return cirruString", following.line, following.column)
@@ -22,7 +22,7 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
           buffer.add child
       of cirruSeq:
         buffer.add resolveDollar(child)
-    return CirruNode(kind: cirruSeq, list: buffer)
+    return CirruNode(kind: cirruSeq, list: buffer, line: expr.line, column: expr.column)
 
 proc resolveComma*(expr: CirruNode): CirruNode =
   case expr.kind
@@ -41,4 +41,4 @@ proc resolveComma*(expr: CirruNode): CirruNode =
             buffer.add resolveComma(x)
         else:
           buffer.add resolveComma(child)
-    return CirruNode(kind: cirruSeq, list: buffer)
+    return CirruNode(kind: cirruSeq, list: buffer, line: expr.line, column: expr.column)

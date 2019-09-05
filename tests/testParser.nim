@@ -65,3 +65,6 @@ test "Parse simple program":
 
   let a3 = %* [["a", ["b"]], ["c"]]
   check (parseCirru("a\n  b\nc") == toCirru(a3))
+
+test "Parse empty program":
+  check (parseCirru("") == CirruNode(kind: cirruSeq, list: @[]))
