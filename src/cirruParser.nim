@@ -1,10 +1,11 @@
 import strutils
 import json
 import cirruParser/types
+import cirruParser/helpers
 import cirruParser/lexer
 import cirruParser/transformer
 
-export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`
+export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`, CirruParseError, formatParserFailure
 
 proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
