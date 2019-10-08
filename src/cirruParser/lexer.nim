@@ -103,7 +103,7 @@ proc lexCode*(code: string): seq[LexNode] =
       of '\n':
         lexingState = lexStateIndent
       of '(':
-        if buffer.len > 0:
+        if buffer.strip().len > 0:
           digestBuffer()
         pieces.add LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
