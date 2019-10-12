@@ -50,6 +50,9 @@ proc raiseParseException*(msg: string, line, column: int) =
   e.column = column
   raise e
 
+proc raiseParseExceptionAtNode*(msg: string, node: LexNode) =
+  raiseParseException(msg, node.line, node.column)
+
 proc isToken*(x: CirruNode): bool =
   x.kind == cirruString
 

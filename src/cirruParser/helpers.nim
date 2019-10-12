@@ -27,6 +27,11 @@ proc genLexControl*(operator: ControlOperator): LexNode =
   return LexNode(kind: lexControl, operator: operator)
 
 proc formatParserFailure*(code, msg, filename: string, line, column: int): string =
-  let failureLine = splitLines(code)[line - 1]
-  let spaces = '-'.repeat(max(0, column - 1)).join("")
-  return "At " & filename & ":" & $line & ":" & $column & "\n" & failureLine & "\n" & spaces & "^ " & msg
+  let lines = splitLines(code)
+  let linenoLenth = ($line).len
+  var previousLine = ""
+  if line > 1:
+    previousLine = align($(line-1), linenoLenth) & " | " & lines[line - 2] & "\n"
+  let failureLine = align($line, linenoLenth) & " | " & lines[line - 1]
+  let spaces = align($line, linenoLenth) & " | " & '-'.repeat(max(0, column - 1)).join("")
+  return "At " & filename & ":" & $line & ":" & $column & "\n" & $previousLine & failureLine & "\n" & spaces & "^ " & msg

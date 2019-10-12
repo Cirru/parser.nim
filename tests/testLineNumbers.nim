@@ -48,3 +48,11 @@ test "Line number results":
     echo formatParserFailure(code4, e.msg, "tmp", e.line, e.column)
 
   echo()
+
+  let code5 = "a\n  b("
+  try:
+    echo parseCirru(code5)
+  except CirruParseError as e:
+    echo formatParserFailure(code5, e.msg, "tmp", e.line, e.column)
+
+  echo()
