@@ -11,6 +11,7 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
 
   var lastToken: LexNode
+  lastToken.line = 1 # line number starts from 1
 
   while tokens.len > 0:
     let cursor = tokens[0]
@@ -54,6 +55,8 @@ proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
       case cursor.operator
       of controlParenOpen:
         tokens.delete 0
+        if tokens.len == 0:
+          raiseParseException("Wrong open paren here", cursor.line, cursor.column)
         let children = digestParsingParens(tokens)
         exprs.add CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
         continue
