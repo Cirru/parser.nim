@@ -35,11 +35,11 @@ proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
         tokens.delete 0
         return exprs
       of controlIndent:
-        raiseParseException("Should not have indentation before paren close", cursor.line, cursor.column)
+        raiseParseExceptionAtNode("Should not have indentation before paren close", cursor)
       of controlOutdent:
-        raiseParseException("Should not have outdentation before paren close", cursor.line, cursor.column)
+        raiseParseExceptionAtNode("Should not have outdentation before paren close", cursor)
 
-  raiseParseException("Unexpected EOF in paren", lastToken.line, lastToken.column)
+  raiseParseExceptionAtNode("Unexpected EOF in paren", lastToken)
 
 proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]
@@ -56,12 +56,12 @@ proc digestParsingIndentation*(tokens: var seq[LexNode]): seq[CirruNode] =
       of controlParenOpen:
         tokens.delete 0
         if tokens.len == 0:
-          raiseParseException("Wrong open paren here", cursor.line, cursor.column)
+          raiseParseExceptionAtNode("Wrong open paren here", cursor)
         let children = digestParsingParens(tokens)
         exprs.add CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlParenClose:
-        raiseParseException("Unexpected paren close inside a line", cursor.line, cursor.column)
+        raiseParseExceptionAtNode("Unexpected paren close inside a line", cursor)
 
       of controlIndent:
         tokens.delete 0
@@ -95,6 +95,6 @@ proc parseCirru*(code: string): CirruNode =
       lines.add CirruNode(kind: cirruSeq, list: children, line: r0.line, column: r0.column)
     else:
       echo tokens
-      raiseParseException("Unexpected tokens sequence!", tokens[0].line, tokens[0].column)
+      raiseParseExceptionAtNode("Unexpected tokens sequence!", tokens[0])
 
   return resolveComma(resolveDollar(CirruNode(kind: cirruSeq, list: lines, line: 1, column: 0)))
