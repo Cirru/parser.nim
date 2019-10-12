@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.0.4"
+version       = "0.0.5"
 author        = "jiyinyiyong"
 description   = "Parser for Cirru syntax"
 license       = "MIT"
