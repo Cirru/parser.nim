@@ -1,0 +1,28 @@
+{
+  "name": "@cirru/parser.nim",
+  "version": "0.0.1-a1",
+  "description": "Cirru parser compiled from Nim code",
+  "main": "js-lib/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "nim js -o:js-lib/index.js ./src/cirruParser.nim && coffee scripts/exports.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cirru/parser.nim.git"
+  },
+  "keywords": [
+    "cirru",
+    "parser",
+    "nim"
+  ],
+  "author": "jiyinyiyong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Cirru/parser.nim/issues"
+  },
+  "homepage": "https://github.com/Cirru/parser.nim#readme"
+}
