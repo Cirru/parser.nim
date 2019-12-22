@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "nim js -o:js-lib/index.js ./src/cirruParser.nim && coffee scripts/exports.coffee"
+    "js": "nim js -d:release -o:js-lib/index.js ./src/cirruParser.nim && coffee scripts/exports.coffee",
+    "try-js": "yarn js && coffee scripts/try-parser.coffee",
+    "prepare": "yarn js"
   },
   "repository": {
     "type": "git",

@@ -40,6 +40,37 @@ formatParserFailure(code, error.msg, "filename", error.line, error.column)
 
 Browse [`tests/`](tests/) you will find examples of all public APIs.
 
+### JavaScript library
+
+Since Nim can be compiled to JavaScript, this library is also published on npm:
+
+```bash
+yarn add @cirru/parser.nim
+```
+
+Nim strings is different from JavaScript string. To call this library, convert string to `number[]` first:
+
+```coffee
+a = require '@cirru/parser.nim'
+code = 'a b'
+codes = code.split('').map (x) -> x.charCodeAt(0)
+cirru.parseCirru codes
+```
+
+For return value `"b"`, it's also represented in `number[]`:
+
+```js
+{
+  "line": 1,
+  "column": 3,
+  "kind": 0,
+  "text": [
+    98
+  ],
+  "list": null
+}
+```
+
 ### License
 
 MIT
