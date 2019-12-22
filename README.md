@@ -44,6 +44,8 @@ Browse [`tests/`](tests/) you will find examples of all public APIs.
 
 Since Nim can be compiled to JavaScript, this library is also published on npm:
 
+![](https://img.shields.io/npm/v/@cirru/parser.nim.svg?style=flat-square)
+
 ```bash
 yarn add @cirru/parser.nim
 ```

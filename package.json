@@ -1,6 +1,6 @@
 {
   "name": "@cirru/parser.nim",
-  "version": "0.0.1-a1",
+  "version": "0.0.5",
   "description": "Cirru parser compiled from Nim code",
   "main": "js-lib/index.js",
   "directories": {
