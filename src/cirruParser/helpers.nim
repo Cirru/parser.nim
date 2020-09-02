@@ -8,12 +8,12 @@ import cirruParser/types
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)
 
-proc jsonToCirru*(xs: JsonNode): CirruNode =
+proc toCirru*(xs: JsonNode): CirruNode =
   case xs.kind:
     of JArray:
       var b: seq[CirruNode]
       for k, v in xs.elems:
-        b.add jsonToCirru(v)
+        b.add toCirru(v)
       return CirruNode(kind: cirruSeq, list: b)
     of JString:
       return CirruNode(kind: cirruString, text: xs.str)
@@ -21,12 +21,12 @@ proc jsonToCirru*(xs: JsonNode): CirruNode =
       echo xs
       raiseParseException("Unknown type in JSON", 1, 0)
 
-proc cirruToJson*(xs: CirruNode): JsonNode =
+proc toJson*(xs: CirruNode): JsonNode =
   case xs.kind:
   of cirruString:
     return JsonNode(kind: JString, str: xs.text)
   of cirruSeq:
-    return JsonNode(kind: JArray, elems: xs.list.map(cirruToJson))
+    return JsonNode(kind: JArray, elems: xs.list.map(toJson))
 
 proc genLexToken*(text: string): LexNode =
   return LexNode(kind: lexToken, text: text)

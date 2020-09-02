@@ -26,16 +26,16 @@ test "Cirru from JSON":
 
   let jsonNodeOfC = JsonNode(kind: JString, str: "c")
   let nodeOfC = CirruNode(kind: cirruString, text: "c")
-  check (jsonToCirru(jsonNodeOfC) == nodeOfC)
+  check (toCirru(jsonNodeOfC) == nodeOfC)
 
   let jsonEmpty = %* []
   let nodeOfEmpty = CirruNode(kind: cirruSeq, list: @[])
-  check (jsonToCirru(jsonEmpty) == nodeOfEmpty)
+  check (toCirru(jsonEmpty) == nodeOfEmpty)
 
   let jsonArray = %* ["a"]
   let nodeOfArray = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruString, text: "a")])
-  check (jsonToCirru(jsonArray) == nodeOfArray)
+  check (toCirru(jsonArray) == nodeOfArray)
 
   let jsonNested = %* [[]]
   let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: @[])])
-  check (jsonToCirru(jsonNested) == nodeOfNested)
+  check (toCirru(jsonNested) == nodeOfNested)
