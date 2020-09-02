@@ -23,11 +23,13 @@ which returns:
 
 `CirruNode` is the type of exprssions and tokens parsed from Cirru code. Browse [types.nim](src/cirruParser/types.nim) for definitions.
 
-A quick way to create Cirru nodes is creating nodes from JSON via `toCirru` function:
+A quick way to create Cirru nodes is creating nodes from JSON via `jsonToCirru` function:
 
 ```nim
 let a4 = %* ["a", "$", "$", "b"]
-toCirru(a4)
+let a5 = jsonToCirru(a4)
+
+cirruToJson(a5) # converts back
 ```
 
 To compare Cirru nodes, use `==`. Notice that this overloaded `==` only checks types and values. Nodes are equal even they contain different line or column fields.

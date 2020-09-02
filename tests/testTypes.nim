@@ -5,7 +5,6 @@ import json
 import cirruParser
 import cirruParser/types
 import cirruParser/helpers
-import cirruParser/lexer
 
 test "nodes comparing":
   let a1 = CirruNode(kind: cirruString, text: "a")
@@ -27,16 +26,16 @@ test "Cirru from JSON":
 
   let jsonNodeOfC = JsonNode(kind: JString, str: "c")
   let nodeOfC = CirruNode(kind: cirruString, text: "c")
-  check (toCirru(jsonNodeOfC) == nodeOfC)
+  check (jsonToCirru(jsonNodeOfC) == nodeOfC)
 
   let jsonEmpty = %* []
   let nodeOfEmpty = CirruNode(kind: cirruSeq, list: @[])
-  check (toCirru(jsonEmpty) == nodeOfEmpty)
+  check (jsonToCirru(jsonEmpty) == nodeOfEmpty)
 
   let jsonArray = %* ["a"]
   let nodeOfArray = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruString, text: "a")])
-  check (toCirru(jsonArray) == nodeOfArray)
+  check (jsonToCirru(jsonArray) == nodeOfArray)
 
   let jsonNested = %* [[]]
   let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: @[])])
-  check (toCirru(jsonNested) == nodeOfNested)
+  check (jsonToCirru(jsonNested) == nodeOfNested)

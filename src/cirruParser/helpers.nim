@@ -1,24 +1,32 @@
 
 import json
 import strutils
+import sequtils
+
 import cirruParser/types
-import math
 
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)
 
-proc toCirru*(xs: JsonNode): CirruNode =
+proc jsonToCirru*(xs: JsonNode): CirruNode =
   case xs.kind:
     of JArray:
       var b: seq[CirruNode]
       for k, v in xs.elems:
-        b.add toCirru(v)
+        b.add jsonToCirru(v)
       return CirruNode(kind: cirruSeq, list: b)
     of JString:
       return CirruNode(kind: cirruString, text: xs.str)
     else:
       echo xs
       raiseParseException("Unknown type in JSON", 1, 0)
+
+proc cirruToJson*(xs: CirruNode): JsonNode =
+  case xs.kind:
+  of cirruString:
+    return JsonNode(kind: JString, str: xs.text)
+  of cirruSeq:
+    return JsonNode(kind: JArray, elems: xs.list.map(cirruToJson))
 
 proc genLexToken*(text: string): LexNode =
   return LexNode(kind: lexToken, text: text)

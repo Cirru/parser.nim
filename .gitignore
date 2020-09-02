@@ -3,5 +3,6 @@ tests/testFiles
 tests/testTransformer
 tests/testLexer
 tests/testIndented
+tests/testParser
 
 js-lib/
