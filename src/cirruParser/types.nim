@@ -38,7 +38,7 @@ type
     lexStateEscape,
     lexStateIndent
 
-  CirruParseError* = ref object of Exception
+  CirruParseError* = ref object of ValueError
     line*: int
     column*: int
 

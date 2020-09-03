@@ -5,7 +5,6 @@ import json
 import cirruParser
 import cirruParser/types
 import cirruParser/helpers
-import cirruParser/lexer
 
 test "nodes comparing":
   let a1 = CirruNode(kind: cirruString, text: "a")

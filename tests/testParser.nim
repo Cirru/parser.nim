@@ -4,7 +4,6 @@ import unittest
 import cirruParser
 import cirruParser/types
 import cirruParser/helpers
-import cirruParser/lexer
 
 test "Parse parens":
   var a1 = @[
@@ -68,3 +67,6 @@ test "Parse simple program":
 
 test "Parse empty program":
   check (parseCirru("") == CirruNode(kind: cirruSeq, list: @[]))
+
+test "Converts to JSON":
+  check (toJson(parseCirru("a $ b $ c")) == %* [["a", ["b", ["c"]]]])
