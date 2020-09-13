@@ -5,7 +5,7 @@ import cirruParser/lexer
 import cirruParser/transformer
 
 export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`, CirruParseError, formatParserFailure
-export toCirru, toJson
+export toCirru, toJson, items, `[]`, len
 
 proc digestParsingParens*(tokens: var seq[LexNode]): seq[CirruNode] =
   var exprs: seq[CirruNode]

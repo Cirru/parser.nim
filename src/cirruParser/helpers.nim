@@ -56,8 +56,27 @@ proc `[]`*(xs: CirruNode, idx: int): CirruNode =
 
   xs.list[idx]
 
+proc `[]`*(xs: CirruNode, fromTo: HSlice[int, int]): seq[CirruNode] =
+  if xs.kind == cirruString:
+    raise newException(ValueError, "Cannot create iterator on a cirru string")
+
+  let fromA = fromTo.a
+  let toB = fromTo.b
+  let size = toB - fromA + 1
+  newSeq(result, size)
+  for idx in 0..<size:
+    result[idx] = xs[fromA + idx]
+
 proc len*(xs: CirruNode): int =
   if xs.kind == cirruString:
     xs.text.len
   else:
     xs.list.len
+
+proc `[]`*(xs: CirruNode, fromTo: HSlice[int, BackwardsIndex]): seq[CirruNode] =
+  if xs.kind == cirruString:
+    raise newException(ValueError, "Cannot create iterator on a cirru string")
+
+  let fromA = fromTo.a
+  let toB =  xs.len - fromTo.b.int
+  xs[fromA .. toB]
