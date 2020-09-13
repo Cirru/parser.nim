@@ -4,5 +4,6 @@ tests/testTransformer
 tests/testLexer
 tests/testIndented
 tests/testParser
+tests/iterator
 
 js-lib/

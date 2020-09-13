@@ -23,6 +23,22 @@ which returns:
 
 `CirruNode` is the type of exprssions and tokens parsed from Cirru code. Browse [types.nim](src/cirruParser/types.nim) for definitions.
 
+```nim
+type
+  CirruNodeKind* = enum
+    cirruString,
+    cirruSeq
+
+  CirruNode* = object
+    line*: int
+    column*: int
+    case kind*: CirruNodeKind
+    of cirruString:
+      text*: string
+    of cirruSeq:
+      list*: seq[CirruNode]
+```
+
 A quick way to create Cirru nodes is creating nodes from JSON via `toCirru` function:
 
 ```nim

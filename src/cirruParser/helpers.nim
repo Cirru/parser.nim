@@ -43,3 +43,21 @@ proc formatParserFailure*(code, msg, filename: string, line, column: int): strin
   let failureLine = align($line, linenoLenth) & " | " & lines[line - 1]
   let spaces = align($line, linenoLenth) & " | " & '-'.repeat(max(0, column - 1)).join("")
   return "At " & filename & ":" & $line & ":" & $column & "\n" & $previousLine & failureLine & "\n" & spaces & "^ " & msg
+
+iterator items*(xs: CirruNode): CirruNode =
+  if xs.kind == cirruString:
+    raise newException(ValueError, "Cannot create iterator on a cirru string")
+  for child in xs.list:
+    yield child
+
+proc `[]`*(xs: CirruNode, idx: int): CirruNode =
+  if xs.kind == cirruString:
+    raise newException(ValueError, "Cannot index on cirru string")
+
+  xs.list[idx]
+
+proc len*(xs: CirruNode): int =
+  if xs.kind == cirruString:
+    xs.text.len
+  else:
+    xs.list.len
