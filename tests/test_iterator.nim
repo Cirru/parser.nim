@@ -2,8 +2,8 @@
 import json
 import unittest
 
-import cirruParser
-import cirruParser/helpers
+import cirru_parser
+import cirru_parser/helpers
 
 test "Try iterator":
   let data = (%* ["1", "2", "3"]).toCirru

@@ -9,7 +9,7 @@ nimble install cirru-parser
 ```
 
 ```nim
-import cirruParser
+import cirru_parser
 
 # parse code
 parseCirru "a b"
@@ -21,7 +21,7 @@ which returns:
 (kind: cirruSeq, list: @[(kind: cirruSeq, list: @[(kind: cirruString, text: "a"), (kind: cirruString, text: "b")])])  : CirruNode
 ```
 
-`CirruNode` is the type of exprssions and tokens parsed from Cirru code. Browse [types.nim](src/cirruParser/types.nim) for definitions.
+`CirruNode` is the type of exprssions and tokens parsed from Cirru code. Browse [types.nim](src/cirru_parser/types.nim) for definitions.
 
 ```nim
 type

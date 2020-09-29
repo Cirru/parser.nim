@@ -1,8 +1,8 @@
 
 import unittest
-import cirruParser/types
-import cirruParser/lexer
-import cirruParser/helpers
+import cirru_parser/types
+import cirru_parser/lexer
+import cirru_parser/helpers
 
 test "Lex nodes equality":
   check (@[genLexToken("a")] == @[genLexToken("a")])

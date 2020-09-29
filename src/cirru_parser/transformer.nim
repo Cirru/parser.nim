@@ -1,5 +1,5 @@
 
-import cirruParser/types
+import ./types
 
 proc resolveDollar*(expr: CirruNode): CirruNode =
   case expr.kind

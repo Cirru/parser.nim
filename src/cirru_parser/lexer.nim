@@ -1,7 +1,8 @@
 
-import cirruParser/types
 import strutils
 import strformat
+
+import ./types
 
 proc lexCode*(code: string): seq[LexNode] =
   var pieces: seq[LexNode]

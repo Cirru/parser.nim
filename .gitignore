@@ -1,9 +1,9 @@
 
-tests/testFiles
-tests/testTransformer
-tests/testLexer
-tests/testIndented
-tests/testParser
-tests/iterator
+tests/test_files
+tests/test_transformer
+tests/test_lexer
+tests/test_indented
+tests/test_parser
+tests/test_iterator
 
 js-lib/
