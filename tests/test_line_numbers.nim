@@ -1,9 +1,9 @@
 
 import unittest
-import cirruParser/types
-import cirruParser/lexer
-import cirruParser/helpers
-import cirruParser
+import cirru_parser/types
+import cirru_parser/lexer
+import cirru_parser/helpers
+import cirru_parser
 
 test "Nodes has position info":
   echo()

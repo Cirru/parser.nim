@@ -1,9 +1,9 @@
 
 import json
 import unittest
-import cirruParser/types
-import cirruParser/helpers
-import cirruParser/transformer
+import cirru_parser/types
+import cirru_parser/helpers
+import cirru_parser/transformer
 
 test "transform dollars":
   let a1 = %* ["a"]

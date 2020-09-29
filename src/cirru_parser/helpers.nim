@@ -3,7 +3,7 @@ import json
 import strutils
 import sequtils
 
-import cirruParser/types
+import ./types
 
 proc createCirruString*(x: string): CirruNode =
   return CirruNode(kind: cirruString, text: x)

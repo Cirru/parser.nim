@@ -1,8 +1,9 @@
 import json
-import cirruParser/types
-import cirruParser/helpers
-import cirruParser/lexer
-import cirruParser/transformer
+
+import cirru_parser/types
+import cirru_parser/helpers
+import cirru_parser/lexer
+import cirru_parser/transformer
 
 export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`, CirruParseError, formatParserFailure
 export toCirru, toJson, items, `[]`, len

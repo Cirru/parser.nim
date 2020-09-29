@@ -1,9 +1,9 @@
 
 import json
 import unittest
-import cirruParser
-import cirruParser/types
-import cirruParser/helpers
+import cirru_parser
+import cirru_parser/types
+import cirru_parser/helpers
 
 test "Parse parens":
   var a1 = @[
