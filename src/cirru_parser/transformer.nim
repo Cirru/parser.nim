@@ -9,6 +9,22 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
   of cirruString:
     return expr
   of cirruSeq:
+
+    # try to skip some children
+    var hasDollar = false
+    var hasList = false
+    for child in expr.list:
+      case child.kind
+      of cirruString:
+        if child.text == "$":
+          hasDollar = true
+          break
+      of cirruSeq:
+        hasList = true
+        break
+    if not hasDollar and not hasList:
+      return expr
+
     var buffer: DoublyLinkedList[CirruNode]
     var k = 0
     for child in expr.list:
@@ -34,6 +50,19 @@ proc resolveComma*(expr: CirruNode): CirruNode =
   of cirruString:
     return expr
   of cirruSeq:
+
+    # try to skip some children
+    var hasList = false
+    for child in expr.list:
+      case child.kind
+      of cirruString:
+        discard
+      of cirruSeq:
+        hasList = true
+        break
+    if not hasList:
+      return expr
+
     var buffer: DoublyLinkedList[CirruNode]
     for child in expr.list:
       case child.kind
