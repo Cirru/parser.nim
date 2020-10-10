@@ -3,6 +3,7 @@ import json
 import lists
 import strutils
 import sequtils
+import options
 
 import ./types
 
@@ -12,10 +13,10 @@ proc createCirruString*(x: string): CirruNode =
 proc toCirru*(xs: JsonNode): CirruNode =
   case xs.kind:
     of JArray:
-      var b: seq[CirruNode]
+      var b: DoublyLinkedList[CirruNode]
       for k, v in xs.elems:
-        b.add toCirru(v)
-      return CirruNode(kind: cirruSeq, list: b.toLinkedList)
+        b.append toCirru(v)
+      return CirruNode(kind: cirruSeq, list: b)
     of JString:
       return CirruNode(kind: cirruString, text: xs.str)
     else:
@@ -51,12 +52,6 @@ iterator items*(xs: CirruNode): CirruNode =
   for child in xs.list:
     yield child
 
-proc `[]`*(xs: CirruNode, idx: int): CirruNode =
-  if xs.kind == cirruString:
-    raise newException(ValueError, "Cannot index on cirru string")
-
-  xs.list.toSeq[idx]
-
 proc `[]`*(xs: CirruNode, fromTo: HSlice[int, int]): seq[CirruNode] =
   if xs.kind == cirruString:
     raise newException(ValueError, "Cannot create iterator on a cirru string")
@@ -66,13 +61,7 @@ proc `[]`*(xs: CirruNode, fromTo: HSlice[int, int]): seq[CirruNode] =
   let size = toB - fromA + 1
   newSeq(result, size)
   for idx in 0..<size:
-    result[idx] = xs[fromA + idx]
-
-proc len*(xs: CirruNode): int =
-  if xs.kind == cirruString:
-    xs.text.len
-  else:
-    xs.list.toSeq.len
+    result[idx] = xs[fromA + idx].get
 
 proc `[]`*(xs: CirruNode, fromTo: HSlice[int, BackwardsIndex]): seq[CirruNode] =
   if xs.kind == cirruString:
@@ -81,12 +70,3 @@ proc `[]`*(xs: CirruNode, fromTo: HSlice[int, BackwardsIndex]): seq[CirruNode] =
   let fromA = fromTo.a
   let toB =  xs.len - fromTo.b.int
   xs[fromA .. toB]
-
-proc copyFrom*[T](xs: DoublyLinkedList[T], n: int): DoublyLinkedList[T] =
-  var ys: DoublyLinkedList[T]
-  var idx = 0
-  for x in xs:
-    if idx >= n:
-      ys.append x
-    idx = idx + 1
-  return ys

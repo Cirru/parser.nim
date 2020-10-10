@@ -2,7 +2,6 @@
 import lists
 
 import ./types
-import ./helpers
 
 proc resolveDollar*(expr: CirruNode): CirruNode =
   case expr.kind
