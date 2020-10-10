@@ -1,5 +1,6 @@
 
 import lists
+import options
 
 type
   CirruNodeKind* = enum
@@ -72,6 +73,26 @@ proc toLinkedList*[T](xs: seq[T]): DoublyLinkedList[T] =
     ys.append x
   return ys
 
+proc `[]`*(xs: CirruNode, idx: int): Option[CirruNode] =
+  if xs.kind == cirruString:
+    raise newException(ValueError, "Cannot index on cirru string")
+
+  var i = 0
+  for item in xs.list:
+    if i == idx:
+      return some(item)
+    i = i + 1
+  return none(CirruNode)
+
+proc len*(xs: CirruNode): int =
+  if xs.kind == cirruString:
+    xs.text.len
+  else:
+    var i = 0
+    for item in xs.list:
+      i = i + 1
+    return i
+
 # TODO need linked list for performance
 proc cirruNodesEqual(x, y: CirruNode): bool =
   ## compare if two nodes equal
@@ -79,12 +100,17 @@ proc cirruNodesEqual(x, y: CirruNode): bool =
     if x.isToken():
       return x.text == y.text
     else:
-      if x.list.toSeq.len == y.list.toSeq.len:
-        for k, v in x.list.toSeq:
-          if cirruNodesEqual(v, y.list.toSeq[k]):
-            continue
+      if x.len == y.len:
+        var k = 0
+        for v in x.list:
+          let vy = y[k]
+          if vy.isNone:
+            return false
+          if cirruNodesEqual(v, y[k].get):
+            discard
           else:
             return false
+          k = k + 1
         return true
       else:
         return false
@@ -98,6 +124,52 @@ proc `==`*(x, y: CirruNode): bool =
 proc `!=`*(x, y: CirruNode): bool =
   # overload equality function
   return not cirruNodesEqual(x, y)
+
+proc isEmpty*(xs: CirruNode): bool =
+  case xs.kind
+  of cirruString:
+    raise newException(ValueError, "Cannot call isEmpty on text CirruNode")
+  of cirruSeq:
+    return xs.list.head.isNil
+
+proc first*(xs: CirruNode): Option[CirruNode] =
+  case xs.kind
+  of cirruString:
+    raise newException(ValueError, "Cannot call first on text CirruNode")
+  of cirruSeq:
+    if xs.isEmpty:
+      return none(CirruNode)
+    else:
+      some(xs.list.head.value)
+
+proc copyFrom*[T](xs: DoublyLinkedList[T], n: int): DoublyLinkedList[T] =
+  var ys: DoublyLinkedList[T]
+  var idx = 0
+  for x in xs:
+    if idx >= n:
+      ys.append x
+    idx = idx + 1
+  return ys
+
+proc restInLinkedList*(xs: CirruNode): DoublyLinkedList[CirruNode] =
+  case xs.kind
+  of cirruString:
+    raise newException(ValueError, "Cannot call rest on text CirruNode")
+  of cirruSeq:
+    if xs.isEmpty:
+      raise newException(ValueError, "Cannot call rest on empty CirruNode")
+    else:
+      xs.list.copyFrom(1)
+
+proc rest*(xs: CirruNode): CirruNode =
+  case xs.kind
+  of cirruString:
+    raise newException(ValueError, "Cannot call rest on text CirruNode")
+  of cirruSeq:
+    if xs.isEmpty:
+      raise newException(ValueError, "Cannot call rest on empty CirruNode")
+    else:
+      return CirruNode(kind: cirruSeq, list: xs.list.copyFrom(1))
 
 # TODO n
 proc lexNodesEqual(xs, ys: seq[LexNode]): bool =

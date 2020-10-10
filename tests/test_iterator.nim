@@ -1,6 +1,7 @@
 
 import json
 import unittest
+import options
 
 import cirru_parser
 import cirru_parser/helpers
@@ -12,7 +13,7 @@ test "Try iterator":
     count += 1
   check count == 3
 
-  check data[0] == (%* "1").toCirru
+  check data[0].get == (%* "1").toCirru
   check data.len == 3
 
 test "Slice":
@@ -29,3 +30,13 @@ test "Slice":
   check a0[0..^1].len == data[0..^1].len
   check a0[1..^1].len == data[1..^1].len
   check a0[1..^2].len == data[1..^2].len
+
+test "first and rest":
+  let data = (%* ["0", "1", "2", "3"]).toCirru
+  let restData = (%* ["1", "2", "3"]).toCirru
+  let zeroData = (%* []).toCirru
+
+  check zeroData.isEmpty
+  check data.isEmpty == false
+  check data.first().get == toCirru(%* "0")
+  check data.rest() == restData
