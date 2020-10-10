@@ -9,6 +9,9 @@ import cirru_parser/lexer
 test "Read line":
   let dataCode = readFile("tests/data/line.json")
   let sourceCode = readFile("tests/cirru/line.cirru")
+
+  echo parseCirru(sourceCode).toJson
+
   check (toCirru(parseJson(dataCode)) == parseCirru(sourceCode))
 
 test "Read spaces":

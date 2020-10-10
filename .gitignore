@@ -5,5 +5,8 @@ tests/test_lexer
 tests/test_indented
 tests/test_parser
 tests/test_iterator
+tests/test_types
+tests/parse_cost
 
 js-lib/
+profile_results.txt

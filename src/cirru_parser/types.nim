@@ -1,5 +1,6 @@
 
-# thanks to https://forum.nim-lang.org/t/4233
+import lists
+
 type
   CirruNodeKind* = enum
     cirruString,
@@ -12,7 +13,7 @@ type
     of cirruString:
       text*: string
     of cirruSeq:
-      list*: seq[CirruNode]
+      list*: DoublyLinkedList[CirruNode]
 
   LexNodeKind* = enum
     lexToken,
@@ -59,15 +60,28 @@ proc isToken*(x: CirruNode): bool =
 proc isSeq*(x: CirruNode): bool =
   x.kind == cirruSeq
 
+proc toSeq*[T](xs: DoublyLinkedList[T]): seq[T] =
+  var ys: seq[T]
+  for x in xs:
+    ys.add x
+  return ys
+
+proc toLinkedList*[T](xs: seq[T]): DoublyLinkedList[T] =
+  var ys: DoublyLinkedList[T]
+  for x in xs:
+    ys.append x
+  return ys
+
+# TODO need linked list for performance
 proc cirruNodesEqual(x, y: CirruNode): bool =
   ## compare if two nodes equal
   if x.kind == y.kind:
     if x.isToken():
       return x.text == y.text
     else:
-      if x.list.len == y.list.len:
-        for k, v in x.list:
-          if cirruNodesEqual(v, y.list[k]):
+      if x.list.toSeq.len == y.list.toSeq.len:
+        for k, v in x.list.toSeq:
+          if cirruNodesEqual(v, y.list.toSeq[k]):
             continue
           else:
             return false
@@ -85,6 +99,7 @@ proc `!=`*(x, y: CirruNode): bool =
   # overload equality function
   return not cirruNodesEqual(x, y)
 
+# TODO n
 proc lexNodesEqual(xs, ys: seq[LexNode]): bool =
   if xs.len != ys.len:
     return false
@@ -107,11 +122,8 @@ proc lexNodesEqual(xs, ys: seq[LexNode]): bool =
 
   return true
 
-
 proc `==`*(x, y: seq[LexNode]): bool =
-  # overload equality function
   return lexNodesEqual(x, y)
 
-proc `!=`*(x, y: seq[LexNode]): bool =
-  # overload equality function
-  return not lexNodesEqual(x, y)
+proc `==`*(x, y: DoublyLinkedList[LexNode]): bool =
+  return lexNodesEqual(x.toSeq, y.toSeq)
