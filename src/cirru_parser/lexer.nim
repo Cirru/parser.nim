@@ -1,11 +1,12 @@
 
+import lists
 import strutils
 import strformat
 
 import ./types
 
-proc lexCode*(code: string): seq[LexNode] =
-  var pieces: seq[LexNode]
+proc lexCode*(code: string): DoublyLinkedList[LexNode] =
+  var pieces = initDoublyLinkedList[LexNode]()
   var lexingState = lexStateIndent
   var buffer = ""
   var indentation = 0
@@ -15,7 +16,7 @@ proc lexCode*(code: string): seq[LexNode] =
 
   proc digestBuffer(): void =
     if buffer.len > 0:
-      pieces.add LexNode(kind: lexToken, text: buffer, line: line, column: column)
+      pieces.append LexNode(kind: lexToken, text: buffer, line: line, column: column)
       buffer = ""
 
   proc digestIdentation(): void =
@@ -29,18 +30,18 @@ proc lexCode*(code: string): seq[LexNode] =
     # echo "indentation:", level
     if level > 0:
       for i in 1..level.int:
-        pieces.add LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
     elif level < 0:
       for i in 1..(-level.int):
-        pieces.add LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
       # special logic to generate extra newline ops
-      pieces.add LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
-      pieces.add LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
+      pieces.append LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
+      pieces.append LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
 
     else:
-      if pieces.len > 0:
-        pieces.add LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
-        pieces.add LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
+      if pieces.head.isNil.not:
+        pieces.append LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
 
     previousIndentation = indentation
     # echo "previousIndentation: ", previousIndentation
@@ -72,7 +73,7 @@ proc lexCode*(code: string): seq[LexNode] =
         lexingState = lexStateString
       of '(':
         digestIdentation()
-        pieces.add LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
       of ')':
         raiseParseException("Unexpected ) in line head", line, column)
@@ -90,7 +91,7 @@ proc lexCode*(code: string): seq[LexNode] =
       of '"':
         lexingState = lexStateSpace
         # special case, add even if token is empty
-        pieces.add LexNode(kind: lexToken, text: buffer, line: line, column: column)
+        pieces.append LexNode(kind: lexToken, text: buffer, line: line, column: column)
         buffer = ""
       else:
         buffer.add c
@@ -106,10 +107,10 @@ proc lexCode*(code: string): seq[LexNode] =
       of '(':
         if buffer.strip().len > 0:
           digestBuffer()
-        pieces.add LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
       of ')':
-        pieces.add LexNode(kind: lexControl, operator: controlParenClose, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlParenClose, line: line, column: column)
         digestBuffer()
         lexingState = lexStateSpace
       else:
@@ -123,11 +124,11 @@ proc lexCode*(code: string): seq[LexNode] =
       of '(':
         if buffer.len > 0:
           digestBuffer()
-        pieces.add LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
       of ')':
         digestBuffer()
-        pieces.add LexNode(kind: lexControl, operator: controlParenClose, line: line, column: column)
+        pieces.append LexNode(kind: lexControl, operator: controlParenClose, line: line, column: column)
         lexingState = lexStateSpace
       of '\n':
         digestBuffer()
@@ -137,7 +138,7 @@ proc lexCode*(code: string): seq[LexNode] =
 
   case lexingState
   of lexStateToken:
-    pieces.add LexNode(kind: lexToken, text: buffer, line: line, column: column)
+    pieces.append LexNode(kind: lexToken, text: buffer, line: line, column: column)
   of lexStateEscape:
     raiseParseException("EOF at escape", line, column)
   of lexStateString:
