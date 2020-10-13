@@ -1,5 +1,5 @@
 
-import lists
+import deques
 
 import ./types
 
@@ -24,7 +24,7 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
     if not hasDollar and not hasList:
       return expr
 
-    var buffer: DoublyLinkedList[CirruNode]
+    var buffer: Deque[CirruNode]
     var k = 0
     for child in expr.list:
       case child.kind
@@ -33,14 +33,14 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
           let following = resolveDollar(CirruNode(kind: cirruSeq, list: expr.list.copyFrom(k+1), line: child.line, column: child.column))
           case following.kind
           of cirruSeq:
-            buffer.append CirruNode(kind: cirruSeq, list: following.list, line: child.line, column: child.column)
+            buffer.addLast CirruNode(kind: cirruSeq, list: following.list, line: child.line, column: child.column)
             break
           of cirruString:
             raiseParseException("Should not return cirruString", following.line, following.column)
         else:
-          buffer.append child
+          buffer.addLast child
       of cirruSeq:
-        buffer.append resolveDollar(child)
+        buffer.addLast resolveDollar(child)
       k += 1
     return CirruNode(kind: cirruSeq, list: buffer, line: expr.line, column: expr.column)
 
@@ -62,16 +62,16 @@ proc resolveComma*(expr: CirruNode): CirruNode =
     if not hasList:
       return expr
 
-    var buffer: DoublyLinkedList[CirruNode]
+    var buffer: Deque[CirruNode]
     for child in expr.list:
       case child.kind
       of cirruString:
-        buffer.append child
+        buffer.addLast child
       of cirruSeq:
-        if child.list.head.isNil.not and child.list.head.value.kind == cirruString and child.list.head.value.text == ",":
+        if child.list.len > 0 and child.list[0].kind == cirruString and child.list[0].text == ",":
           let resolvedChild = resolveComma(child)
           for x in resolvedChild.list.copyFrom(1):
-            buffer.append resolveComma(x)
+            buffer.addLast resolveComma(x)
         else:
-          buffer.append resolveComma(child)
+          buffer.addLast resolveComma(child)
     return CirruNode(kind: cirruSeq, list: buffer, line: expr.line, column: expr.column)

@@ -1,5 +1,5 @@
 
-import lists
+import deques
 import options
 
 type
@@ -14,7 +14,7 @@ type
     of cirruString:
       text*: string
     of cirruSeq:
-      list*: DoublyLinkedList[CirruNode]
+      list*: Deque[CirruNode]
 
   LexNodeKind* = enum
     lexToken,
@@ -61,16 +61,16 @@ proc isToken*(x: CirruNode): bool =
 proc isSeq*(x: CirruNode): bool =
   x.kind == cirruSeq
 
-proc toSeq*[T](xs: DoublyLinkedList[T]): seq[T] =
+proc toSeq*[T](xs: Deque[T]): seq[T] =
   var ys: seq[T]
   for x in xs:
     ys.add x
   return ys
 
-proc toLinkedList*[T](xs: seq[T]): DoublyLinkedList[T] =
-  var ys: DoublyLinkedList[T]
+proc toLinkedList*[T](xs: seq[T]): Deque[T] =
+  var ys: Deque[T]
   for x in xs:
-    ys.append x
+    ys.addLast x
   return ys
 
 proc `[]`*(xs: CirruNode, idx: int): Option[CirruNode] =
@@ -130,7 +130,7 @@ proc isEmpty*(xs: CirruNode): bool =
   of cirruString:
     raise newException(ValueError, "Cannot call isEmpty on text CirruNode")
   of cirruSeq:
-    return xs.list.head.isNil
+    return xs.list.len == 0
 
 proc first*(xs: CirruNode): Option[CirruNode] =
   case xs.kind
@@ -140,18 +140,18 @@ proc first*(xs: CirruNode): Option[CirruNode] =
     if xs.isEmpty:
       return none(CirruNode)
     else:
-      some(xs.list.head.value)
+      some(xs.list[0])
 
-proc copyFrom*[T](xs: DoublyLinkedList[T], n: int): DoublyLinkedList[T] =
-  var ys: DoublyLinkedList[T]
+proc copyFrom*[T](xs: Deque[T], n: int): Deque[T] =
+  var ys: Deque[T]
   var idx = 0
   for x in xs:
     if idx >= n:
-      ys.append x
+      ys.addLast x
     idx = idx + 1
   return ys
 
-proc restInLinkedList*(xs: CirruNode): DoublyLinkedList[CirruNode] =
+proc restInLinkedList*(xs: CirruNode): Deque[CirruNode] =
   case xs.kind
   of cirruString:
     raise newException(ValueError, "Cannot call rest on text CirruNode")
@@ -197,5 +197,5 @@ proc lexNodesEqual(xs, ys: seq[LexNode]): bool =
 proc `==`*(x, y: seq[LexNode]): bool =
   return lexNodesEqual(x, y)
 
-proc `==`*(x, y: DoublyLinkedList[LexNode]): bool =
+proc `==`*(x, y: Deque[LexNode]): bool =
   return lexNodesEqual(x.toSeq, y.toSeq)

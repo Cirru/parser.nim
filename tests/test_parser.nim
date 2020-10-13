@@ -1,6 +1,6 @@
 
 import json
-import lists
+import deques
 import unittest
 import cirru_parser
 import cirru_parser/types
@@ -67,7 +67,7 @@ test "Parse simple program":
   check (parseCirru("a\n  b\nc") == toCirru(a3))
 
 test "Parse empty program":
-  check (parseCirru("") == CirruNode(kind: cirruSeq, list: initDoublyLinkedList[CirruNode]()))
+  check (parseCirru("") == CirruNode(kind: cirruSeq, list: initDeque[CirruNode]()))
 
 test "Converts to JSON":
   check (toJson(parseCirru("a $ b $ c")) == %* [["a", ["b", ["c"]]]])

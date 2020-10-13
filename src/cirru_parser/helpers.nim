@@ -1,6 +1,6 @@
 
 import json
-import lists
+import deques
 import strutils
 import sequtils
 import options
@@ -13,9 +13,9 @@ proc createCirruString*(x: string): CirruNode =
 proc toCirru*(xs: JsonNode): CirruNode =
   case xs.kind:
     of JArray:
-      var b: DoublyLinkedList[CirruNode]
+      var b: Deque[CirruNode]
       for k, v in xs.elems:
-        b.append toCirru(v)
+        b.addLast toCirru(v)
       return CirruNode(kind: cirruSeq, list: b)
     of JString:
       return CirruNode(kind: cirruString, text: xs.str)

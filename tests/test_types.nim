@@ -1,6 +1,6 @@
 
 import unittest
-import lists
+import deques
 import json
 
 import cirru_parser
@@ -16,7 +16,7 @@ test "nodes comparing":
   let a3 = CirruNode(kind: cirruString, text: "b")
   check (a1 != a3)
 
-  let b0 = initDoublyLinkedList[CirruNode]()
+  let b0 = initDeque[CirruNode]()
   let b1 = CirruNode(kind: cirruSeq, list: b0)
   let b2 = CirruNode(kind: cirruSeq, list: b0)
   check (b1 == b2)
@@ -30,7 +30,7 @@ test "Cirru from JSON":
   check (toCirru(jsonNodeOfC) == nodeOfC)
 
   let jsonEmpty = %* []
-  let nodeOfEmpty = CirruNode(kind: cirruSeq, list: initDoublyLinkedList[CirruNode]())
+  let nodeOfEmpty = CirruNode(kind: cirruSeq, list: initDeque[CirruNode]())
   check (toCirru(jsonEmpty) == nodeOfEmpty)
 
   let jsonArray = %* ["a"]
@@ -38,5 +38,5 @@ test "Cirru from JSON":
   check (toCirru(jsonArray) == nodeOfArray)
 
   let jsonNested = %* [[]]
-  let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: initDoublyLinkedList[CirruNode]())].toLinkedList)
+  let nodeOfNested = CirruNode(kind: cirruSeq, list: @[CirruNode(kind: cirruSeq, list: initDeque[CirruNode]())].toLinkedList)
   check (toCirru(jsonNested) == nodeOfNested)

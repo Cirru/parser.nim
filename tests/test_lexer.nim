@@ -1,5 +1,5 @@
 
-import lists
+import deques
 import unittest
 
 import cirru_parser/types

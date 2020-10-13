@@ -20,3 +20,4 @@ task t, "Runs the test suite":
 
 task perf, "try large file":
   exec "nim compile --verbosity:0 --profiler:on --stackTrace:on --hints:off -r tests/parse_cost"
+  # exec "nim compile --verbosity:0 --hints:off -r tests/parse_cost"

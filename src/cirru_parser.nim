@@ -1,5 +1,5 @@
 import json
-import lists
+import deques
 
 import cirru_parser/types
 import cirru_parser/helpers
@@ -9,32 +9,32 @@ import cirru_parser/transformer
 export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`, CirruParseError, formatParserFailure
 export toCirru, toJson, items, `[]`, len, first, isEmpty, rest, restInLinkedList
 
-proc digestParsingParens*(tokens: var DoublyLinkedList[LexNode]): DoublyLinkedList[CirruNode] =
-  var exprs: DoublyLinkedList[CirruNode]
+proc digestParsingParens*(tokens: var Deque[LexNode]): Deque[CirruNode] =
+  var exprs: Deque[CirruNode]
 
   var lastToken: LexNode
   lastToken.line = 1 # line number starts from 1
 
-  while tokens.head.isNil.not:
-    let cursor = tokens.head.value
+  while tokens.len > 0:
+    let cursor = tokens[0]
 
     # recorded for generating error messages
     lastToken = cursor
 
     case cursor.kind
     of lexToken:
-      exprs.append CirruNode(kind: cirruString, text: cursor.text, line: cursor.line, column: cursor.column)
-      tokens.remove tokens.head
+      exprs.addLast CirruNode(kind: cirruString, text: cursor.text, line: cursor.line, column: cursor.column)
+      tokens.popFirst()
       continue
     of lexControl:
       case cursor.operator
       of controlParenOpen:
-        tokens.remove tokens.head
+        tokens.popFirst()
         let children = digestParsingParens(tokens)
-        exprs.append CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
+        exprs.addLast CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlParenClose:
-        tokens.remove tokens.head
+        tokens.popFirst()
         return exprs
       of controlIndent:
         raiseParseExceptionAtNode("Should not have indentation before paren close", cursor)
@@ -43,58 +43,58 @@ proc digestParsingParens*(tokens: var DoublyLinkedList[LexNode]): DoublyLinkedLi
 
   raiseParseExceptionAtNode("Unexpected EOF in paren", lastToken)
 
-proc digestParsingIndentation*(tokens: var DoublyLinkedList[LexNode]): DoublyLinkedList[CirruNode] =
-  var exprs: DoublyLinkedList[CirruNode]
+proc digestParsingIndentation*(tokens: var Deque[LexNode]): Deque[CirruNode] =
+  var exprs: Deque[CirruNode]
 
-  while tokens.head.isNil.not:
-    let cursor = tokens.head.value
+  while tokens.len > 0:
+    let cursor = tokens[0]
     case cursor.kind
     of lexToken:
-      exprs.append CirruNode(kind: cirruString, text: cursor.text, line: cursor.line, column: cursor.column)
-      tokens.remove tokens.head
+      exprs.addLast CirruNode(kind: cirruString, text: cursor.text, line: cursor.line, column: cursor.column)
+      tokens.popFirst()
       continue
     of lexControl:
       case cursor.operator
       of controlParenOpen:
-        tokens.remove tokens.head
-        if tokens.head.isNil:
+        tokens.popFirst()
+        if tokens.len == 0:
           raiseParseExceptionAtNode("Wrong open paren here", cursor)
         let children = digestParsingParens(tokens)
-        exprs.append CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
+        exprs.addLast CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlParenClose:
         raiseParseExceptionAtNode("Unexpected paren close inside a line", cursor)
 
       of controlIndent:
-        tokens.remove tokens.head
+        tokens.popFirst()
         let children = digestParsingIndentation(tokens)
-        exprs.append CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
+        exprs.addLast CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlOutdent:
-        tokens.remove tokens.head
+        tokens.popFirst()
         return exprs
 
   return exprs
 
 proc parseCirru*(code: string): CirruNode {.exportc.} =
   var tokens = lexCode(code)
-  var lines: DoublyLinkedList[CirruNode]
+  var lines: Deque[CirruNode]
 
   # echo "tokens: ", tokens
 
-  if tokens.head.isNil:
-    return CirruNode(kind: cirruSeq, list: initDoublyLinkedList[CirruNode](), line: 1, column: 0)
+  if tokens.len == 0:
+    return CirruNode(kind: cirruSeq, list: initDeque[CirruNode](), line: 1, column: 0)
 
-  let r0 = tokens.head.value
+  let r0 = tokens[0]
   let firstExpr = digestParsingIndentation(tokens)
-  lines.append CirruNode(kind: cirruSeq, list: firstExpr, line: r0.line, column: r0.column)
+  lines.addLast CirruNode(kind: cirruSeq, list: firstExpr, line: r0.line, column: r0.column)
 
-  while tokens.head.isNil.not:
-    let r0 = tokens.head.value
+  while tokens.len > 0:
+    let r0 = tokens[0]
     if r0.kind == lexControl and r0.operator == controlIndent:
-      tokens.remove tokens.head
+      tokens.popFirst()
       let children = digestParsingIndentation(tokens)
-      lines.append CirruNode(kind: cirruSeq, list: children, line: r0.line, column: r0.column)
+      lines.addLast CirruNode(kind: cirruSeq, list: children, line: r0.line, column: r0.column)
     else:
       echo tokens
       raiseParseExceptionAtNode("Unexpected tokens sequence!", r0)

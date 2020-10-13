@@ -36,7 +36,7 @@ type
     of cirruString:
       text*: string
     of cirruSeq:
-      list*: DoublyLinkedList[CirruNode]
+      list*: Deque[CirruNode]
 ```
 
 A quick way to create Cirru nodes is creating nodes from JSON via `toCirru` function:
