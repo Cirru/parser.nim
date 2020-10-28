@@ -82,7 +82,13 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
         buffer = $c
         lexingState = lexStateToken
     of lexStateEscape:
-      buffer.add c
+      case c
+      of 'n':
+        buffer.add '\n'
+      of 't':
+        buffer.add '\t'
+      else:
+        buffer.add c
       lexingState = lexStateString
     of lexStateString:
       case c
