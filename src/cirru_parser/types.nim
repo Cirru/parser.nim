@@ -86,7 +86,7 @@ proc `[]`*(xs: CirruNode, idx: int): Option[CirruNode] =
 
 proc len*(xs: CirruNode): int =
   if xs.kind == cirruString:
-    xs.text.len
+    return xs.text.len
   else:
     var i = 0
     for item in xs.list:
@@ -140,7 +140,7 @@ proc first*(xs: CirruNode): Option[CirruNode] =
     if xs.isEmpty:
       return none(CirruNode)
     else:
-      some(xs.list.head.value)
+      return some(xs.list.head.value)
 
 proc copyFrom*[T](xs: DoublyLinkedList[T], n: int): DoublyLinkedList[T] =
   var ys: DoublyLinkedList[T]
