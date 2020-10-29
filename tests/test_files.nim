@@ -4,7 +4,6 @@ import json
 import cirru_parser
 import cirru_parser/types
 import cirru_parser/helpers
-import cirru_parser/lexer
 
 test "Read line":
   let dataCode = readFile("tests/data/line.json")
