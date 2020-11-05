@@ -5,7 +5,7 @@ Nim Cirru Parser
 > Parser for Cirru Syntax.
 
 ```bash
-nimble install cirru-parser
+nimble install cirru_parser
 ```
 
 ```nim
