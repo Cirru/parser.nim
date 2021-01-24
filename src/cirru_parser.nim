@@ -6,7 +6,7 @@ import cirru_parser/helpers
 import cirru_parser/lexer
 import cirru_parser/transformer
 
-export CirruNode, CirruNodeKind, isSeq, isToken, `==`, `!=`, CirruParseError, formatParserFailure
+export CirruNode, CirruNodeKind, isList, isToken, `==`, `!=`, CirruParseError, formatParserFailure
 export toCirru, toJson, items, `[]`, len, first, isEmpty, rest, restInLinkedList
 
 proc digestParsingParens*(tokens: var DoublyLinkedList[LexNode]): DoublyLinkedList[CirruNode] =
@@ -23,15 +23,15 @@ proc digestParsingParens*(tokens: var DoublyLinkedList[LexNode]): DoublyLinkedLi
 
     case cursor.kind
     of lexToken:
-      exprs.append CirruNode(kind: cirruString, text: cursor.text, line: cursor.line, column: cursor.column)
+      exprs.append CirruNode(kind: cirruToken, token: cursor.token, line: cursor.line, column: cursor.column)
       tokens.remove tokens.head
       continue
-    of lexControl:
+    of lexOperator:
       case cursor.operator
       of controlParenOpen:
         tokens.remove tokens.head
         let children = digestParsingParens(tokens)
-        exprs.append CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
+        exprs.append CirruNode(kind: cirruList, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlParenClose:
         tokens.remove tokens.head
@@ -50,17 +50,17 @@ proc digestParsingIndentation*(tokens: var DoublyLinkedList[LexNode]): DoublyLin
     let cursor = tokens.head.value
     case cursor.kind
     of lexToken:
-      exprs.append CirruNode(kind: cirruString, text: cursor.text, line: cursor.line, column: cursor.column)
+      exprs.append CirruNode(kind: cirruToken, token: cursor.token, line: cursor.line, column: cursor.column)
       tokens.remove tokens.head
       continue
-    of lexControl:
+    of lexOperator:
       case cursor.operator
       of controlParenOpen:
         tokens.remove tokens.head
         if tokens.head.isNil:
           raiseParseExceptionAtNode("Wrong open paren here", cursor)
         let children = digestParsingParens(tokens)
-        exprs.append CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
+        exprs.append CirruNode(kind: cirruList, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlParenClose:
         raiseParseExceptionAtNode("Unexpected paren close inside a line", cursor)
@@ -68,7 +68,7 @@ proc digestParsingIndentation*(tokens: var DoublyLinkedList[LexNode]): DoublyLin
       of controlIndent:
         tokens.remove tokens.head
         let children = digestParsingIndentation(tokens)
-        exprs.append CirruNode(kind: cirruSeq, list: children, line: cursor.line, column: cursor.column)
+        exprs.append CirruNode(kind: cirruList, list: children, line: cursor.line, column: cursor.column)
         continue
       of controlOutdent:
         tokens.remove tokens.head
@@ -83,20 +83,20 @@ proc parseCirru*(code: string): CirruNode {.exportc.} =
   # echo "tokens: ", tokens
 
   if tokens.head.isNil:
-    return CirruNode(kind: cirruSeq, list: initDoublyLinkedList[CirruNode](), line: 1, column: 0)
+    return CirruNode(kind: cirruList, list: initDoublyLinkedList[CirruNode](), line: 1, column: 0)
 
   let r0 = tokens.head.value
   let firstExpr = digestParsingIndentation(tokens)
-  lines.append CirruNode(kind: cirruSeq, list: firstExpr, line: r0.line, column: r0.column)
+  lines.append CirruNode(kind: cirruList, list: firstExpr, line: r0.line, column: r0.column)
 
   while tokens.head.isNil.not:
     let r0 = tokens.head.value
-    if r0.kind == lexControl and r0.operator == controlIndent:
+    if r0.kind == lexOperator and r0.operator == controlIndent:
       tokens.remove tokens.head
       let children = digestParsingIndentation(tokens)
-      lines.append CirruNode(kind: cirruSeq, list: children, line: r0.line, column: r0.column)
+      lines.append CirruNode(kind: cirruList, list: children, line: r0.line, column: r0.column)
     else:
       echo tokens
       raiseParseExceptionAtNode("Unexpected tokens sequence!", r0)
 
-  return resolveComma(resolveDollar(CirruNode(kind: cirruSeq, list: lines, line: 1, column: 0)))
+  return resolveComma(resolveDollar(CirruNode(kind: cirruList, list: lines, line: 1, column: 0)))

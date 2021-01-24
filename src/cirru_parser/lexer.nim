@@ -16,7 +16,7 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
 
   proc digestBuffer(): void =
     if buffer.len > 0:
-      pieces.append LexNode(kind: lexToken, text: buffer, line: line, column: column)
+      pieces.append LexNode(kind: lexToken, token: buffer, line: line, column: column)
       buffer = ""
 
   proc digestIdentation(): void =
@@ -30,18 +30,18 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
     # echo "indentation:", level
     if level > 0:
       for i in 1..level.int:
-        pieces.append LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlIndent, line: line, column: column)
     elif level < 0:
       for i in 1..(-level.int):
-        pieces.append LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlOutdent, line: line, column: column)
       # special logic to generate extra newline ops
-      pieces.append LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
-      pieces.append LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
+      pieces.append LexNode(kind: lexOperator, operator: controlOutdent, line: line, column: column)
+      pieces.append LexNode(kind: lexOperator, operator: controlIndent, line: line, column: column)
 
     else:
       if pieces.head.isNil.not:
-        pieces.append LexNode(kind: lexControl, operator: controlOutdent, line: line, column: column)
-        pieces.append LexNode(kind: lexControl, operator: controlIndent, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlOutdent, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlIndent, line: line, column: column)
 
     previousIndentation = indentation
     # echo "previousIndentation: ", previousIndentation
@@ -73,7 +73,7 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
         lexingState = lexStateString
       of '(':
         digestIdentation()
-        pieces.append LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
       of ')':
         raiseParseException("Unexpected ) in line head", line, column)
@@ -97,7 +97,7 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
       of '"':
         lexingState = lexStateSpace
         # special case, add even if token is empty
-        pieces.append LexNode(kind: lexToken, text: buffer, line: line, column: column)
+        pieces.append LexNode(kind: lexToken, token: buffer, line: line, column: column)
         buffer = ""
       else:
         buffer.add c
@@ -113,10 +113,10 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
       of '(':
         if buffer.strip().len > 0:
           digestBuffer()
-        pieces.append LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
       of ')':
-        pieces.append LexNode(kind: lexControl, operator: controlParenClose, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlParenClose, line: line, column: column)
         digestBuffer()
         lexingState = lexStateSpace
       else:
@@ -130,11 +130,11 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
       of '(':
         if buffer.len > 0:
           digestBuffer()
-        pieces.append LexNode(kind: lexControl, operator: controlParenOpen, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlParenOpen, line: line, column: column)
         lexingState = lexStateSpace
       of ')':
         digestBuffer()
-        pieces.append LexNode(kind: lexControl, operator: controlParenClose, line: line, column: column)
+        pieces.append LexNode(kind: lexOperator, operator: controlParenClose, line: line, column: column)
         lexingState = lexStateSpace
       of '\n':
         digestBuffer()
@@ -144,7 +144,7 @@ proc lexCode*(code: string): DoublyLinkedList[LexNode] =
 
   case lexingState
   of lexStateToken:
-    pieces.append LexNode(kind: lexToken, text: buffer, line: line, column: column)
+    pieces.append LexNode(kind: lexToken, token: buffer, line: line, column: column)
   of lexStateEscape:
     raiseParseException("EOF at escape", line, column)
   of lexStateString:
