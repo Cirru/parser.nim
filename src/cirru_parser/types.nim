@@ -4,21 +4,21 @@ import options
 
 type
   CirruNodeKind* = enum
-    cirruString,
-    cirruSeq
+    cirruToken,
+    cirruList
 
   CirruNode* = object
     line*: int
     column*: int
     case kind*: CirruNodeKind
-    of cirruString:
-      text*: string
-    of cirruSeq:
+    of cirruToken:
+      token*: string
+    of cirruList:
       list*: DoublyLinkedList[CirruNode]
 
   LexNodeKind* = enum
     lexToken,
-    lexControl
+    lexOperator
 
   ControlOperator* = enum
     controlParenOpen,
@@ -30,8 +30,8 @@ type
     line*: int
     column*: int
     case kind*: LexNodeKind
-    of lexToken: text*: string
-    of lexControl: operator*: ControlOperator
+    of lexToken: token*: string
+    of lexOperator: operator*: ControlOperator
 
   LexState* = enum
     lexStateToken,
@@ -56,10 +56,10 @@ proc raiseParseExceptionAtNode*(msg: string, node: LexNode) =
   raiseParseException(msg, node.line, node.column)
 
 proc isToken*(x: CirruNode): bool =
-  x.kind == cirruString
+  x.kind == cirruToken
 
-proc isSeq*(x: CirruNode): bool =
-  x.kind == cirruSeq
+proc isList*(x: CirruNode): bool =
+  x.kind == cirruList
 
 proc toSeq*[T](xs: DoublyLinkedList[T]): seq[T] =
   var ys: seq[T]
@@ -74,7 +74,7 @@ proc toLinkedList*[T](xs: seq[T]): DoublyLinkedList[T] =
   return ys
 
 proc `[]`*(xs: CirruNode, idx: int): Option[CirruNode] =
-  if xs.kind == cirruString:
+  if xs.kind == cirruToken:
     raise newException(ValueError, "Cannot index on cirru string")
 
   var i = 0
@@ -85,8 +85,8 @@ proc `[]`*(xs: CirruNode, idx: int): Option[CirruNode] =
   return none(CirruNode)
 
 proc len*(xs: CirruNode): int =
-  if xs.kind == cirruString:
-    return xs.text.len
+  if xs.kind == cirruToken:
+    return xs.token.len
   else:
     var i = 0
     for item in xs.list:
@@ -98,7 +98,7 @@ proc cirruNodesEqual(x, y: CirruNode): bool =
   ## compare if two nodes equal
   if x.kind == y.kind:
     if x.isToken():
-      return x.text == y.text
+      return x.token == y.token
     else:
       if x.len == y.len:
         var k = 0
@@ -127,16 +127,16 @@ proc `!=`*(x, y: CirruNode): bool =
 
 proc isEmpty*(xs: CirruNode): bool =
   case xs.kind
-  of cirruString:
+  of cirruToken:
     raise newException(ValueError, "Cannot call isEmpty on text CirruNode")
-  of cirruSeq:
+  of cirruList:
     return xs.list.head.isNil
 
 proc first*(xs: CirruNode): Option[CirruNode] =
   case xs.kind
-  of cirruString:
+  of cirruToken:
     raise newException(ValueError, "Cannot call first on text CirruNode")
-  of cirruSeq:
+  of cirruList:
     if xs.isEmpty:
       return none(CirruNode)
     else:
@@ -153,9 +153,9 @@ proc copyFrom*[T](xs: DoublyLinkedList[T], n: int): DoublyLinkedList[T] =
 
 proc restInLinkedList*(xs: CirruNode): DoublyLinkedList[CirruNode] =
   case xs.kind
-  of cirruString:
+  of cirruToken:
     raise newException(ValueError, "Cannot call rest on text CirruNode")
-  of cirruSeq:
+  of cirruList:
     if xs.isEmpty:
       raise newException(ValueError, "Cannot call rest on empty CirruNode")
     else:
@@ -163,13 +163,13 @@ proc restInLinkedList*(xs: CirruNode): DoublyLinkedList[CirruNode] =
 
 proc rest*(xs: CirruNode): CirruNode =
   case xs.kind
-  of cirruString:
+  of cirruToken:
     raise newException(ValueError, "Cannot call rest on text CirruNode")
-  of cirruSeq:
+  of cirruList:
     if xs.isEmpty:
       raise newException(ValueError, "Cannot call rest on empty CirruNode")
     else:
-      return CirruNode(kind: cirruSeq, list: xs.list.copyFrom(1))
+      return CirruNode(kind: cirruList, list: xs.list.copyFrom(1))
 
 # TODO n
 proc lexNodesEqual(xs, ys: seq[LexNode]): bool =
@@ -185,11 +185,11 @@ proc lexNodesEqual(xs, ys: seq[LexNode]): bool =
     if xi.kind != yi.kind:
       return false
     case xi.kind:
-    of lexControl:
+    of lexOperator:
       if xi.operator != yi.operator:
         return false
     of lexToken:
-      if xi.text != yi.text:
+      if xi.token != yi.token:
         return false
 
   return true

@@ -5,20 +5,20 @@ import ./types
 
 proc resolveDollar*(expr: CirruNode): CirruNode =
   case expr.kind
-  of cirruString:
+  of cirruToken:
     return expr
-  of cirruSeq:
+  of cirruList:
 
     # try to skip some children
     var hasDollar = false
     var hasList = false
     for child in expr.list:
       case child.kind
-      of cirruString:
-        if child.text == "$":
+      of cirruToken:
+        if child.token == "$":
           hasDollar = true
           break
-      of cirruSeq:
+      of cirruList:
         hasList = true
         break
     if not hasDollar and not hasList:
@@ -28,35 +28,35 @@ proc resolveDollar*(expr: CirruNode): CirruNode =
     var k = 0
     for child in expr.list:
       case child.kind
-      of cirruString:
-        if child.text == "$":
-          let following = resolveDollar(CirruNode(kind: cirruSeq, list: expr.list.copyFrom(k+1), line: child.line, column: child.column))
+      of cirruToken:
+        if child.token == "$":
+          let following = resolveDollar(CirruNode(kind: cirruList, list: expr.list.copyFrom(k+1), line: child.line, column: child.column))
           case following.kind
-          of cirruSeq:
-            buffer.append CirruNode(kind: cirruSeq, list: following.list, line: child.line, column: child.column)
+          of cirruList:
+            buffer.append CirruNode(kind: cirruList, list: following.list, line: child.line, column: child.column)
             break
-          of cirruString:
-            raiseParseException("Should not return cirruString", following.line, following.column)
+          of cirruToken:
+            raiseParseException("Should not return cirruToken", following.line, following.column)
         else:
           buffer.append child
-      of cirruSeq:
+      of cirruList:
         buffer.append resolveDollar(child)
       k += 1
-    return CirruNode(kind: cirruSeq, list: buffer, line: expr.line, column: expr.column)
+    return CirruNode(kind: cirruList, list: buffer, line: expr.line, column: expr.column)
 
 proc resolveComma*(expr: CirruNode): CirruNode =
   case expr.kind
-  of cirruString:
+  of cirruToken:
     return expr
-  of cirruSeq:
+  of cirruList:
 
     # try to skip some children
     var hasList = false
     for child in expr.list:
       case child.kind
-      of cirruString:
+      of cirruToken:
         discard
-      of cirruSeq:
+      of cirruList:
         hasList = true
         break
     if not hasList:
@@ -65,13 +65,13 @@ proc resolveComma*(expr: CirruNode): CirruNode =
     var buffer: DoublyLinkedList[CirruNode]
     for child in expr.list:
       case child.kind
-      of cirruString:
+      of cirruToken:
         buffer.append child
-      of cirruSeq:
-        if child.list.head.isNil.not and child.list.head.value.kind == cirruString and child.list.head.value.text == ",":
+      of cirruList:
+        if child.list.head.isNil.not and child.list.head.value.kind == cirruToken and child.list.head.value.token == ",":
           let resolvedChild = resolveComma(child)
           for x in resolvedChild.list.copyFrom(1):
             buffer.append resolveComma(x)
         else:
           buffer.append resolveComma(child)
-    return CirruNode(kind: cirruSeq, list: buffer, line: expr.line, column: expr.column)
+    return CirruNode(kind: cirruList, list: buffer, line: expr.line, column: expr.column)

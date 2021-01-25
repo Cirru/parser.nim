@@ -7,8 +7,8 @@ import options
 
 import ./types
 
-proc createCirruString*(x: string): CirruNode =
-  return CirruNode(kind: cirruString, text: x)
+proc createCirruToken*(x: string): CirruNode =
+  return CirruNode(kind: cirruToken, token: x)
 
 proc toCirru*(xs: JsonNode): CirruNode =
   case xs.kind:
@@ -16,25 +16,25 @@ proc toCirru*(xs: JsonNode): CirruNode =
       var b: DoublyLinkedList[CirruNode]
       for k, v in xs.elems:
         b.append toCirru(v)
-      return CirruNode(kind: cirruSeq, list: b)
+      return CirruNode(kind: cirruList, list: b)
     of JString:
-      return CirruNode(kind: cirruString, text: xs.str)
+      return CirruNode(kind: cirruToken, token: xs.str)
     else:
       echo xs
       raiseParseException("Unknown type in JSON", 1, 0)
 
 proc toJson*(xs: CirruNode): JsonNode =
   case xs.kind:
-  of cirruString:
-    return JsonNode(kind: JString, str: xs.text)
-  of cirruSeq:
+  of cirruToken:
+    return JsonNode(kind: JString, str: xs.token)
+  of cirruList:
     return JsonNode(kind: JArray, elems: xs.list.toSeq.map(toJson))
 
-proc genLexToken*(text: string): LexNode =
-  return LexNode(kind: lexToken, text: text)
+proc genLexToken*(x: string): LexNode =
+  return LexNode(kind: lexToken, token: x)
 
-proc genLexControl*(operator: ControlOperator): LexNode =
-  return LexNode(kind: lexControl, operator: operator)
+proc genLexOperator*(operator: ControlOperator): LexNode =
+  return LexNode(kind: lexOperator, operator: operator)
 
 proc formatParserFailure*(code, msg, filename: string, line, column: int): string =
   let lines = splitLines(code)
@@ -47,13 +47,13 @@ proc formatParserFailure*(code, msg, filename: string, line, column: int): strin
   return "At " & filename & ":" & $line & ":" & $column & "\n" & $previousLine & failureLine & "\n" & spaces & "^ " & msg
 
 iterator items*(xs: CirruNode): CirruNode =
-  if xs.kind == cirruString:
+  if xs.kind == cirruToken:
     raise newException(ValueError, "Cannot create iterator on a cirru string")
   for child in xs.list:
     yield child
 
 proc `[]`*(xs: CirruNode, fromTo: HSlice[int, int]): seq[CirruNode] =
-  if xs.kind == cirruString:
+  if xs.kind == cirruToken:
     raise newException(ValueError, "Cannot create iterator on a cirru string")
 
   let fromA = fromTo.a
@@ -64,7 +64,7 @@ proc `[]`*(xs: CirruNode, fromTo: HSlice[int, int]): seq[CirruNode] =
     result[idx] = xs[fromA + idx].get
 
 proc `[]`*(xs: CirruNode, fromTo: HSlice[int, BackwardsIndex]): seq[CirruNode] =
-  if xs.kind == cirruString:
+  if xs.kind == cirruToken:
     raise newException(ValueError, "Cannot create iterator on a cirru string")
 
   let fromA = fromTo.a

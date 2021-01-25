@@ -18,7 +18,7 @@ parseCirru "a b"
 which returns:
 
 ```nim
-(kind: cirruSeq, list: @[(kind: cirruSeq, list: @[(kind: cirruString, text: "a"), (kind: cirruString, text: "b")])])  : CirruNode
+(kind: cirruList, list: @[(kind: cirruList, list: @[(kind: cirruToken, token: "a"), (kind: cirruToken, token: "b")])])  : CirruNode
 ```
 
 `CirruNode` is the type of exprssions and tokens parsed from Cirru code. Browse [types.nim](src/cirru_parser/types.nim) for definitions.
@@ -26,16 +26,16 @@ which returns:
 ```nim
 type
   CirruNodeKind* = enum
-    cirruString,
-    cirruSeq
+    cirruToken,
+    cirruList
 
   CirruNode* = object
     line*: int
     column*: int
     case kind*: CirruNodeKind
-    of cirruString:
-      text*: string
-    of cirruSeq:
+    of cirruToken:
+      token*: string
+    of cirruList:
       list*: DoublyLinkedList[CirruNode]
 ```
 
